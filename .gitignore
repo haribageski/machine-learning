@@ -1,0 +1,8 @@
+logs
+target
+/.idea
+/.input
+/.classpath
+/.project
+resources
+/RUNNING_PID

@@ -1,0 +1,114 @@
+package utils
+
+import dailyFinancialParameters.{CompanyDailyFinDataEntry, CompanyDailyFinParameter}
+import org.scalatest.{FlatSpec, Matchers}
+import reading_data_from_file.ReadColumns
+import utils.ordered.DefaultOrdered._
+import utils.readers.ReadableDefaults.CompanyDailyFinParameterReader
+
+import scala.collection.immutable.TreeSet
+
+class ReadersTest  extends FlatSpec with Matchers {
+  "readColumn()" should "return the columns as List[List[String]], the first list being the list of all lines" in {
+    val filePath = "resources/dividends/NOOF.txt"
+    ReadColumns.readColumns(filePath) should be (
+      List(
+        List("NOOF", "19/03/2008", "0.125"), List("NOOF", "19/12/2007", "0.125"),
+        List("NOOF", "13/09/2007", "0.125"), List("NOOF", "31/05/2007", "0.125")
+      )
+    )
+  }
+
+  "readCompanyDividends() " should "read all CompanyDailyFinParameter dividends of the company from file" in {
+    import utils.readers.ReadableDefaults._
+    val sym = "NOOF"
+    val companyDividends = CompanyDailyFinParameter(sym)
+
+    val dividends = List(
+      CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended("31/05/2007")),
+      CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended("13/09/2007")),
+      CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended("19/12/2007")),
+      CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended("19/03/2008"))
+    )
+
+    val earliestD = CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended("19/03/2008"))
+    val oldestD = CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended("31/05/2007"))
+
+    val dividendsRead: CompanyDailyFinParameter = CompanyDailyFinParameterReader.readDividendFromFile("NOOF")
+    val toComp = CompanyDailyFinParameter(sym, Some(oldestD), Some(earliestD), dividends,
+      Map(2007 -> TreeSet(
+        CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended("31/05/2007")),
+        CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended("13/09/2007")),
+        CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended("19/12/2007"))
+      ),
+        2008 -> TreeSet(
+          CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended("19/03/2008"))
+        )
+      )
+    )
+    dividendsRead == toComp should be(true)
+  }
+
+
+  "readCompanySUEs() " should "read all CompanyDailyFinParameter expected earnings of the company from file" in {
+    val sym = "NOOF"
+    val companySUE = CompanyDailyFinParameter(sym, null, null, List.empty[CompanyDailyFinDataEntry],
+      Map.empty[Int, TreeSet[CompanyDailyFinDataEntry]])
+
+    val sues = List(
+      CompanyDailyFinDataEntry("NOOF", 85.7099990844727,  DateExtended("10/06/2010")),
+      CompanyDailyFinDataEntry("NOOF", -57.1399993896484, DateExtended("06/08/2010")),
+      CompanyDailyFinDataEntry("NOOF", -133.330001831055, DateExtended("05/11/2010")),
+      CompanyDailyFinDataEntry("NOOF", -80,               DateExtended("04/02/2011"))
+    )
+
+    val earliestS = CompanyDailyFinDataEntry("NOOF", -80,               DateExtended("04/02/2011"))
+    val oldestS = CompanyDailyFinDataEntry("NOOF", 85.7099990844727,  DateExtended("10/06/2010"))
+
+    val suesRead = CompanyDailyFinParameterReader.readEarningSurpriseFromFile("NOOF")
+    val toComp =  CompanyDailyFinParameter(sym, Some(oldestS), Some(earliestS), sues,
+      Map(2010 -> TreeSet(
+        CompanyDailyFinDataEntry("NOOF", 85.7099990844727,  DateExtended("10/06/2010")),
+        CompanyDailyFinDataEntry("NOOF", -57.1399993896484, DateExtended("06/08/2010")),
+        CompanyDailyFinDataEntry("NOOF", -133.330001831055, DateExtended("05/11/2010"))
+      ),
+        2011 -> TreeSet(
+          CompanyDailyFinDataEntry("NOOF", -80,  DateExtended("04/02/2011"))
+        ))
+    )
+    suesRead == toComp should be(true)
+  }
+
+
+
+  "readCompanyQuotes() " should "read all CompanyDailyFinParameter quotes in expected format" in {
+    val sym = "test"
+    val companyQuotes = CompanyDailyFinParameter(sym, null, null, List.empty[CompanyDailyFinDataEntry],
+      Map.empty[Int, TreeSet[CompanyDailyFinDataEntry]])
+
+    val quotes = List(
+      CompanyDailyFinDataEntry("test", 2.01, DateExtended("22/11/2012")),
+      CompanyDailyFinDataEntry("test", 1.99, DateExtended("23/11/2012")),
+      CompanyDailyFinDataEntry("test", 2.01, DateExtended("26/11/2012")),
+      CompanyDailyFinDataEntry("test", 2.02, DateExtended("27/11/2012")),
+      CompanyDailyFinDataEntry("test", 2.02, DateExtended("28/11/2012"))
+    )
+
+    val oldestQ = CompanyDailyFinDataEntry("test", 2.01, DateExtended("22/11/2012"))
+    val earliestQ= CompanyDailyFinDataEntry("test", 2.02, DateExtended("28/11/2012"))
+
+    val quotesRead: CompanyDailyFinParameter = CompanyDailyFinParameterReader.readQuotesFromFile("test")
+
+    val toComp =  CompanyDailyFinParameter(sym, Some(oldestQ), Some(earliestQ), quotes,
+      Map(2012 -> TreeSet(
+        CompanyDailyFinDataEntry("test", 2.01, DateExtended("22/11/2012")),
+        CompanyDailyFinDataEntry("test", 1.99, DateExtended("23/11/2012")),
+        CompanyDailyFinDataEntry("test", 2.01, DateExtended("26/11/2012")),
+        CompanyDailyFinDataEntry("test", 2.02, DateExtended("27/11/2012")),
+        CompanyDailyFinDataEntry("test", 2.02, DateExtended("28/11/2012"))
+      ))
+    )
+
+    quotesRead == toComp should be(true)
+  }
+}
