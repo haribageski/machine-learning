@@ -2,9 +2,8 @@ package utils
 
 import org.joda.time.IllegalFieldValueException
 import org.scalatest._
-import utils.{DateExtended, SymDate}
 import scala.collection.SortedSet
-import utils.ordered.DefaultOrdered._
+import utils.ordered.OrderedSyntax._
 
 class SymDateTest extends FlatSpec with Matchers {
   val dateExtended1 =  DateExtended("01/01/2016")
@@ -18,6 +17,7 @@ class SymDateTest extends FlatSpec with Matchers {
   val symDate3 =  SymDate("C", dateExtended3)
   val symDate4 =  SymDate("D", dateExtended4)
   val symDate5 =  SymDate("A", dateExtended5)
+  val symDate6 =  SymDate("A", dateExtended1)
 
 
   "Instance of SymDate " should "have a correct symbol and DateTime" in {
@@ -44,7 +44,12 @@ class SymDateTest extends FlatSpec with Matchers {
   }
 
   "SymDate.equals" should "return true for two DateExtended with same symbol name and date" in {
+    import utils.cats_Eq.EqDefaults._
+    import cats.syntax.eq._
+    import utils.cats_Eq.EqSyntax._
+
     symDate1 == symDate1 should be(true)
+    symDate1 equals symDate6 should be(true)
     symDate1 == symDate2 should be(false)
     symDate1 == "01/01/2016" should be(false)
     symDate2 == 1 should be(false)

@@ -2,6 +2,11 @@ package utils.readers
 
 import dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
 import utils.DateExtended
+import yearlyFinancialParameters.{CompanyYearlyFinData, CompanyYearlyFinParameter, CompanyYearlyFinDataEntry}
+
+import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
+import scala.io.Source._
 
 trait ReadableParameter[A] {
   def readParameterFromFile(filePath: String, symbol: String, indexOfValue: Int): A
@@ -11,8 +16,8 @@ trait Readable[A] {
   def readDataFromFile(symbol: String): A
 }
 
-trait ReadableColumns[F[F[String]]] {
-  def readColumnsFromFile(filePath: String): F[F[String]]
+trait ReadableColumns {
+  def readColumnsFromFile(filePath: String): List[List[String]]
 }
 
 object ReadableDefaults {
@@ -21,11 +26,10 @@ object ReadableDefaults {
       * The files to read the dividends from are with lines of the following structure:
       * symbol /t date /t value
       * Remark: Not tail recursive.
+      * Test: None
       */
     override def readParameterFromFile(filePath: String, symbol: String, indexOfValue: Int): CompanyDailyFinParameter = {
-      import reading_data_from_file.ReadColumns
-
-      val readData: List[List[String]] = ReadColumns.readColumns(filePath)
+      val readData: List[List[String]] = ColumnsReader.readColumnsFromFile(filePath)
 
       val filteredInput: List[List[String]] =
         readData.filter(
@@ -45,12 +49,30 @@ object ReadableDefaults {
       entriesRead
     }
 
+    /**
+      * Test: utils.ReadersTest
+      *
+      * @param symbol
+      * @return
+      */
     def readDividendFromFile(symbol: String) =
       readParameterFromFile("resources/dividends/" + symbol + ".txt", symbol, 2)
 
+    /**
+      * Test: utils.ReadersTest
+      *
+      * @param symbol
+      * @return
+      */
     def readQuotesFromFile(symbol: String) =
       readParameterFromFile("resources/quotes-prices/" + symbol + ".txt", symbol, 3)
 
+    /**
+      * Test: utils.ReadersTest
+      *
+      * @param symbol
+      * @return
+      */
     def readEarningSurpriseFromFile(symbol: String) =
       readParameterFromFile("resources/earning-surprises/" + symbol + ".txt", symbol, 2)
   }
@@ -89,5 +111,109 @@ object ReadableDefaults {
     }
   }
 
-  implicit object ColumnsReader extends ReadableColumns[List[List[String]]]
+  /**
+    * The files to read the yearly parameters from are with lines of the following structure:
+    * symbol /t date /t parameter1 /t parameter2 /t parameter3 /t parameter4
+    */
+  implicit object CompanyYearlyFinDataReader extends Readable[CompanyYearlyFinData] {
+    override def readDataFromFile(symbol: String): CompanyYearlyFinData = {
+//      import utils.readers.ReadableDefaults.ColumnsReader
+      import utils.filters.DefaultFilters.Validator._
+
+      //TODO: Get filePath in other way (from config)
+      val filePath = "resources/yearly-fin-parameters/" + symbol + ".txt"
+
+      val indexesOfValues = Seq(2,3,4,5)
+      val inputDataFromFile: List[List[String]] = ColumnsReader.readColumnsFromFile(filePath)
+
+      val filteredInput: List[List[String]] = inputDataFromFile.filter(validateValueInLines(indexesOfValues))
+      val filteredZeroShares = filteredInput.filter(line => line(3).toInt != 0)
+
+      //TODO: The followint mappings can be combined and done in one iteration
+      val entriesForParameterBookVal: List[CompanyYearlyFinDataEntry] =
+        filteredZeroShares.map(
+          line => CompanyYearlyFinDataEntry(
+            symbol, line(2).toDouble, DateExtended(line(1)).dateExtended.getYear
+          )
+        )
+      val entriesForParameterShares: List[CompanyYearlyFinDataEntry] =
+        filteredZeroShares.map(
+          line => CompanyYearlyFinDataEntry(
+            symbol, line(3).toDouble, DateExtended(line(1)).dateExtended.getYear
+          )
+        )
+      val entriesForParameterROEs: List[CompanyYearlyFinDataEntry] =
+        filteredZeroShares.map(
+          line => CompanyYearlyFinDataEntry(
+            symbol, line(4).toDouble, DateExtended(line(1)).dateExtended.getYear
+          )
+        )
+      val entriesForParameterAccruals: List[CompanyYearlyFinDataEntry] =
+        filteredZeroShares.map(
+          line => CompanyYearlyFinDataEntry(
+            symbol, line(5).toDouble, DateExtended(line(1)).dateExtended.getYear
+          )
+        )
+
+
+      val emptyBookValue = CompanyYearlyFinParameter(symbol)
+      val emptyShares = CompanyYearlyFinParameter(symbol)
+      val emptyROE = CompanyYearlyFinParameter(symbol)
+      val emptyAccrual = CompanyYearlyFinParameter(symbol)
+
+      val allBookValues: CompanyYearlyFinParameter =
+        entriesForParameterBookVal.foldLeft(emptyBookValue)((acc, entryYoAdd) => acc.addEntry(entryYoAdd))
+      val allShares: CompanyYearlyFinParameter =
+        entriesForParameterShares.foldLeft(emptyShares)((acc, entryToAdd) => acc.addEntry(entryToAdd))
+      val allROEs: CompanyYearlyFinParameter =
+        entriesForParameterROEs.foldLeft(emptyROE)((acc, entryYoAdd) => acc.addEntry(entryYoAdd))
+      val allAccruals: CompanyYearlyFinParameter =
+        entriesForParameterAccruals.foldLeft(emptyAccrual)((acc, entryYoAdd) => acc.addEntry(entryYoAdd))
+
+      new CompanyYearlyFinData(
+        symbol,
+        allBookValues,
+        allShares,
+        allROEs,
+        allAccruals
+      )
+    }
+  }
+
+
+  implicit object ColumnsReader extends ReadableColumns {
+    def readColumnsFromFile(filePath: String): List[List[String]] = {
+      val lines = readFile(filePath)
+      findColumnsFromInputLines(lines, ListBuffer.empty[List[String]])
+    }
+
+    private def readFile(filePath: String): List[String] = {
+      val source = fromFile(filePath)
+      try source.getLines.toList
+      finally source.close()
+    }
+
+    /**
+      * The lines with fields "NaN" or "" or "null" are filtered out.
+      *
+      * @param lines   : List[String]
+      * @param columns : ListBuffer[List[String]
+      * @return
+      */
+    @tailrec
+    private def findColumnsFromInputLines(lines: List[String], columns: ListBuffer[List[String]]): List[List[String]] =
+      lines match {
+        case Nil => columns.reverse.toList
+        case currentLine :: tailLines =>
+          val columnsInCurrentLine: Array[String] = currentLine.split("\\t")
+          val validLine: Boolean = columnsInCurrentLine.forall {
+            case "NaN" | "" | "null" => false
+            case _ => true
+          }
+          validLine match {
+            case false => findColumnsFromInputLines(tailLines, columns)
+            case _ => findColumnsFromInputLines(tailLines, columns += columnsInCurrentLine.toList)
+          }
+      }
+  }
 }

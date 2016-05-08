@@ -1,9 +1,8 @@
 package utils
 
 import org.scalatest._
-import utils.{SymYear, DateExtended}
 import scala.collection.SortedSet
-import utils.ordered.DefaultOrdered._
+import utils.ordered.OrderedSyntax._
 
 class SymYearTest extends FlatSpec with Matchers {
   val dateExtended1 =  DateExtended("01/01/2016")

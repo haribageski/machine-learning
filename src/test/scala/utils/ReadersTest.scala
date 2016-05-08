@@ -2,16 +2,15 @@ package utils
 
 import dailyFinancialParameters.{CompanyDailyFinDataEntry, CompanyDailyFinParameter}
 import org.scalatest.{FlatSpec, Matchers}
-import reading_data_from_file.ReadColumns
-import utils.ordered.DefaultOrdered._
-import utils.readers.ReadableDefaults.CompanyDailyFinParameterReader
+import utils.ordered.OrderedSyntax._
+import utils.readers.ReadableDefaults.{CompanyDailyFinParameterReader, ColumnsReader}
 
 import scala.collection.immutable.TreeSet
 
 class ReadersTest  extends FlatSpec with Matchers {
   "readColumn()" should "return the columns as List[List[String]], the first list being the list of all lines" in {
     val filePath = "resources/dividends/NOOF.txt"
-    ReadColumns.readColumns(filePath) should be (
+    ColumnsReader.readColumnsFromFile(filePath) should be (
       List(
         List("NOOF", "19/03/2008", "0.125"), List("NOOF", "19/12/2007", "0.125"),
         List("NOOF", "13/09/2007", "0.125"), List("NOOF", "31/05/2007", "0.125")

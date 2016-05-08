@@ -4,17 +4,18 @@ import dailyFinancialParameters.CompanyDailyFinData
 import org.scalatest.{Matchers, FlatSpec}
 import utils.SymYear
 import utils.readers.ReadableDefaults.CompanyDailyFinDataReader
-import yearlyFinancialParameters.{YearlyFinDataEntry, CompanyYearlyFinData, CompanyYearlyExtendedFinData}
+import yearlyFinancialParameters.{CompanyYearlyFinDataEntry, CompanyYearlyFinData, CompanyYearlyExtendedFinData}
 
 class CompanyYearlyExtendedFinDataTest  extends FlatSpec with Matchers {
   "deriveAdditionalFinParameters() and filterInconsistentEntries()" should "derive MarketVal, BMratio, and Size" in {
 
     import utils.filters.DefaultFilters.CompanyYearlyExtendedFinDataFilter
     import utils.filters.FilterSyntax.FilterOps
+    import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader._
 
     val sym = "Example"
     val companyYearlyExtendedFinData = CompanyYearlyExtendedFinData(
-      CompanyYearlyFinData(sym).readFromFiles(),
+      readDataFromFile(sym),
       CompanyDailyFinDataReader.readDataFromFile(sym)
     )
     val companyYearlyExtendedWithDerivedParams: CompanyYearlyExtendedFinData =
@@ -23,17 +24,17 @@ class CompanyYearlyExtendedFinDataTest  extends FlatSpec with Matchers {
     //printing the three derived parameters
     companyYearlyExtendedWithDerivedParams.companyMarketValues.foreach(m =>
       m.allCompanyEntriesOfOneYearlyParam.head
-        should be (YearlyFinDataEntry(sym, 100000, 2014)
+        should be (CompanyYearlyFinDataEntry(sym, 100000, 2014)
       )
     )
     companyYearlyExtendedWithDerivedParams.companyBMratio.foreach(m =>
       m.allCompanyEntriesOfOneYearlyParam.head
-    should be (YearlyFinDataEntry(sym, -4, 2014)
+    should be (CompanyYearlyFinDataEntry(sym, -4, 2014)
       )
     )
     companyYearlyExtendedWithDerivedParams.companySize.foreach(m =>
       m.allCompanyEntriesOfOneYearlyParam.head
-        should be (YearlyFinDataEntry(sym, 5, 2014)
+        should be (CompanyYearlyFinDataEntry(sym, 5, 2014)
       )
     )
 

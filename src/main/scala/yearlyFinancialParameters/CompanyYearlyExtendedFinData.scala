@@ -19,24 +19,25 @@ case class CompanyYearlyExtendedFinData(companyYearlyFinData: CompanyYearlyFinDa
     * parameters included.
     * The entries will be a set of SymDates that is the intersection of all the yearly parameters entries and all the
     * daily parameters.
+ *
     * @return
     */
   def deriveAdditionalFinParameters(): CompanyYearlyExtendedFinData = {
     val symYears = companyYearlyFinData.bookValue.perYearM.keySet
     val sym = companyYearlyFinData.symbol
 
-    val marketValsToAdd: List[YearlyFinDataEntry] = findMarketValuesToAdd(symYears = symYears)
+    val marketValsToAdd: List[CompanyYearlyFinDataEntry] = findMarketValuesToAdd(symYears = symYears)
 
 
-    val bMratiosToAdd: List[YearlyFinDataEntry] = marketValsToAdd.flatMap(marketValEntry => {
-      val bookValOpt: Option[YearlyFinDataEntry] =
+    val bMratiosToAdd: List[CompanyYearlyFinDataEntry] = marketValsToAdd.flatMap(marketValEntry => {
+      val bookValOpt: Option[CompanyYearlyFinDataEntry] =
         companyYearlyFinData.bookValue.perYearM.get(marketValEntry.symYear)
       bookValOpt.map(book =>
         marketValEntry.copy(value = Math.log10(book.value / marketValEntry.value))  //division is safe
       )
     })
 
-    val sizeValsYearlyToAdd: List[YearlyFinDataEntry] = marketValsToAdd.map(marketValEntry =>
+    val sizeValsYearlyToAdd: List[CompanyYearlyFinDataEntry] = marketValsToAdd.map(marketValEntry =>
         marketValEntry.copy(value = Math.log10(marketValEntry.value))
       )
 
@@ -71,12 +72,13 @@ case class CompanyYearlyExtendedFinData(companyYearlyFinData: CompanyYearlyFinDa
   /**
     * Finds nonzero MarketValue using average per year quotes and yearly share for all years from the input parameter.
     * If for some year is not possible, then the returning list will not contain any MarketValue for that year.
+ *
     * @param marketVals: List[YearlyFinDataEntry] = Nil, symYears: Set[SymYear]
     * @return
     */
   @tailrec
-  private def findMarketValuesToAdd(marketVals: List[YearlyFinDataEntry] = Nil, symYears: Set[SymYear]):
-  List[YearlyFinDataEntry] = {
+  private def findMarketValuesToAdd(marketVals: List[CompanyYearlyFinDataEntry] = Nil, symYears: Set[SymYear]):
+  List[CompanyYearlyFinDataEntry] = {
     symYears.isEmpty match {
       case true => marketVals
       case false =>
@@ -99,7 +101,7 @@ case class CompanyYearlyExtendedFinData(companyYearlyFinData: CompanyYearlyFinDa
 
         nonZeroMarketValues match {
           case Some(v) => findMarketValuesToAdd(
-            YearlyFinDataEntry(sym, v, year) :: marketVals, symYears.tail
+            CompanyYearlyFinDataEntry(sym, v, year) :: marketVals, symYears.tail
           )
           case None => findMarketValuesToAdd(marketVals, symYears.tail)
         }

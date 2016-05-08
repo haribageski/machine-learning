@@ -8,19 +8,20 @@ import scala.language.implicitConversions
 
 
 case class CompanyYearlyFinParameter(symbol: String,
-                                     oldestEntryOpt: Option[YearlyFinDataEntry],
-                                     earliestEntryOpt: Option[YearlyFinDataEntry],
-                                     perYearM: Map[SymYear, YearlyFinDataEntry],
-                                     allCompanyEntriesOfOneYearlyParam: List[YearlyFinDataEntry]
+                                     oldestEntryOpt: Option[CompanyYearlyFinDataEntry],
+                                     earliestEntryOpt: Option[CompanyYearlyFinDataEntry],
+                                     perYearM: Map[SymYear, CompanyYearlyFinDataEntry],
+                                     allCompanyEntriesOfOneYearlyParam: List[CompanyYearlyFinDataEntry]
                                        ) {
 
   /**
     * It simultaneously updates the oldest and newest entry, adds instance to the map, and adds the instance to a list.
+    *
     * @param entry: YearlyFinDataEntry
     * @return
     */
-  def addEntry(entry: YearlyFinDataEntry): CompanyYearlyFinParameter = {
-    import utils.ordered.DefaultOrdered.OrderedSymYear
+  def addEntry(entry: CompanyYearlyFinDataEntry): CompanyYearlyFinParameter = {
+    import utils.ordered.OrderedSyntax.OrderedSymYear
     if (entry.symbol == symbol) {
       val symYear = SymYear(symbol, entry.year)
 
@@ -28,18 +29,34 @@ case class CompanyYearlyFinParameter(symbol: String,
         case Nil => //this is the case when we add the first dividend
           CompanyYearlyFinParameter(symbol, Some(entry), Some(entry), TreeMap(symYear -> entry), List(entry))
 
-        case l: List[YearlyFinDataEntry] =>
+        case l: List[CompanyYearlyFinDataEntry] =>
           if (entry.year > oldestEntryOpt.get.year && entry.year < earliestEntryOpt.get.year) {
-            CompanyYearlyFinParameter(symbol, oldestEntryOpt, earliestEntryOpt, perYearM + (symYear -> entry), entry :: l)
+            this.copy(
+              perYearM = perYearM + (symYear -> entry),
+              allCompanyEntriesOfOneYearlyParam = entry :: l
+            )
           }
           else if (entry.year < oldestEntryOpt.get.year && entry.year < earliestEntryOpt.get.year) {
-            CompanyYearlyFinParameter(symbol, Some(entry), earliestEntryOpt, perYearM + (symYear -> entry), entry :: l)
+            this.copy(
+              oldestEntryOpt = Some(entry),
+              perYearM = perYearM + (symYear -> entry),
+              allCompanyEntriesOfOneYearlyParam = entry :: l
+            )
           }
           else if (entry.year > oldestEntryOpt.get.year && entry.year > earliestEntryOpt.get.year) {
-            CompanyYearlyFinParameter(symbol, oldestEntryOpt, Some(entry), perYearM + (symYear -> entry), entry :: l)
+            this.copy(
+              earliestEntryOpt = Some(entry),
+              perYearM = perYearM + (symYear -> entry),
+              allCompanyEntriesOfOneYearlyParam = entry :: l
+            )
           }
           else {
-            CompanyYearlyFinParameter(symbol, Some(entry), Some(entry), perYearM + (symYear -> entry), entry :: l)
+            this.copy(
+              oldestEntryOpt = Some(entry),
+              earliestEntryOpt = Some(entry),
+              perYearM = perYearM + (symYear -> entry),
+              allCompanyEntriesOfOneYearlyParam = entry :: l
+            )
           }
       }
     }
@@ -51,7 +68,7 @@ case class CompanyYearlyFinParameter(symbol: String,
 
 
   @tailrec
-  final def addEntries(entriesL: List[YearlyFinDataEntry]): CompanyYearlyFinParameter = entriesL match {
+  final def addEntries(entriesL: List[CompanyYearlyFinDataEntry]): CompanyYearlyFinParameter = entriesL match {
     case Nil => this
     case h :: t => this.addEntry(h).addEntries(t)
   }

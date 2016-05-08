@@ -2,7 +2,7 @@ package dailyFinancialParameters
 
 import org.scalatest.{Matchers, FlatSpec}
 import utils.DateExtended
-import utils.ordered.DefaultOrdered._
+import utils.ordered.OrderedSyntax._
 import scala.collection.immutable.TreeSet
 
 class CompanyDailyFinParameterTest extends FlatSpec with Matchers {

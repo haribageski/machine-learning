@@ -20,11 +20,12 @@ case class CompanyDailyFinParameter(symbol: String,
     * The new entry is added by contructing a new CompanyDailyFinData,
     * with entry prepended to allCompanyEntriesOfOneDailyParam.
     * The oldestDividend and earliestDividend are updated appropriately.
+    *
     * @param entry: DailyFinDataEntry
     * @return
     */
   def addEntry(entry: CompanyDailyFinDataEntry): CompanyDailyFinParameter = {
-    import utils.ordered.DefaultOrdered.{OrderedCompanyDailyFinDataEntry, OrderedDateExtended}
+    import utils.ordered.OrderedSyntax.{OrderedCompanyDailyFinDataEntry, OrderedDateExtended}
 
     if (entry.symbol == symbol) {
       val year = entry.date.dateExtended.getYear
@@ -37,22 +38,28 @@ case class CompanyDailyFinParameter(symbol: String,
 
         case l: List[CompanyDailyFinDataEntry] =>
           if (entry.date > oldestEntryO.get.date && entry.date < earliestEntryO.get.date)
-            new CompanyDailyFinParameter(
-              symbol, oldestEntryO, earliestEntryO, entry :: l, groupedByYearM + (year -> (valuesInYear + entry))
+            this.copy(
+              allCompanyEntriesOfOneDailyParam = entry :: l,
+              groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
             )
-
-
           else if (entry.date < oldestEntryO.get.date)
-            new CompanyDailyFinParameter(
-              symbol, Some(entry), earliestEntryO, entry :: l, groupedByYearM + (year -> (valuesInYear + entry))
+            this.copy(
+              oldestEntryO = Some(entry),
+              allCompanyEntriesOfOneDailyParam = entry :: l,
+              groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
             )
           else if (entry.date > earliestEntryO.get.date)
-            new CompanyDailyFinParameter(
-              symbol, oldestEntryO, Some(entry), entry :: l, groupedByYearM + (year -> (valuesInYear + entry))
+            this.copy(
+              earliestEntryO = Some(entry),
+              allCompanyEntriesOfOneDailyParam = entry :: l,
+              groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
             )
           else
-            new CompanyDailyFinParameter(
-              symbol, Some(entry), Some(entry), entry :: l, groupedByYearM + (year -> (valuesInYear + entry))
+            this.copy(
+              oldestEntryO = Some(entry),
+              earliestEntryO = Some(entry),
+              allCompanyEntriesOfOneDailyParam = entry :: l,
+              groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
             )
       }
     }

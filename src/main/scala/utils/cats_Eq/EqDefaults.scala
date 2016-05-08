@@ -2,7 +2,9 @@ package utils.cats_Eq
 
 import cats.Eq
 import cats.syntax.eq._
-import utils.{SymDate, DateExtended, SymYear}
+import dailyFinancialParameters.CompanyDailyFinDataEntry
+import utils.{DateExtended, SymDate, SymYear}
+import yearlyFinancialParameters.CompanyYearlyFinDataEntry
 
 
 object EqDefaults {
@@ -28,5 +30,19 @@ object EqDefaults {
     (symDate1.sym === symDate1.sym) && (symDate1.dateE  === symDate2.dateE)
   }
 
+
+  implicit val eqYearlyFinDataEntry: Eq[CompanyYearlyFinDataEntry] = Eq.instance[CompanyYearlyFinDataEntry] { (entry1, entry2) =>
+    import cats.std.string._
+    import cats.std.int._
+    import cats.std.double._
+    (entry1.symbol === entry2.symbol) && (entry1.value === entry2.value) && (entry1.year === entry2.year)
+  }
+
+  implicit val eqDailyFinDataEntry: Eq[CompanyDailyFinDataEntry] =
+    Eq.instance[CompanyDailyFinDataEntry] { (entry1, entry2) =>
+    import cats.std.string._
+    import cats.std.double._
+    (entry1.symbol === entry2.symbol) && (entry1.value === entry2.value)
+  }
 }
 

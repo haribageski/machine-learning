@@ -1,7 +1,7 @@
 package utils.filters
 
 import dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
-import yearlyFinancialParameters.{CompanyYearlyFinData, CompanyYearlyExtendedFinData, YearlyFinDataEntry, CompanyYearlyFinParameter}
+import yearlyFinancialParameters.{CompanyYearlyFinData, CompanyYearlyExtendedFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 
 import scala.annotation.tailrec
 
@@ -14,6 +14,12 @@ trait FilterData[A] {
 }
 
 object DefaultFilters {
+  //TODO: Is this a good place for Validator? It is not really a filter.
+  implicit object Validator {
+    def validateValueInLines(indexes: Seq[Int])(line: List[String]): Boolean = {
+      indexes.forall(index => line(index).toDouble != Double.NaN && line(index) != null)
+    }
+  }
 
   implicit object CompanyDailyFinParameterFilter extends FilterParameter[CompanyDailyFinParameter] {
 
@@ -52,21 +58,17 @@ object DefaultFilters {
   }
 
 
-  implicit object CompanyDailyFinDataFilter
-    extends FilterData[CompanyDailyFinData] {
-
+  implicit object CompanyDailyFinDataFilter extends FilterData[CompanyDailyFinData] {
     override def applyFilter(companyDailyFinData: CompanyDailyFinData): CompanyDailyFinData = {
       val symbol = companyDailyFinData.symbol
       val parameterDividends = companyDailyFinData.parameterDividends
       val parameterQuotes = companyDailyFinData.parameterQuotes
       val parameterSUEs = companyDailyFinData.parameterSUEs
 
-      val intersectDividendsAndQuotesYears: List[Int] =
-        parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date.dateExtended.getYear).intersect(
-          parameterQuotes.allCompanyEntriesOfOneDailyParam.map(_.date.dateExtended.getYear))
       val intersectAllThreeDailyParamsYears: List[Int] =
-        intersectDividendsAndQuotesYears.intersect(
-          parameterSUEs.allCompanyEntriesOfOneDailyParam.map(_.date.dateExtended.getYear))
+        parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date.dateExtended.getYear)
+          .intersect(parameterQuotes.allCompanyEntriesOfOneDailyParam.map(_.date.dateExtended.getYear))
+          .intersect(parameterSUEs.allCompanyEntriesOfOneDailyParam.map(_.date.dateExtended.getYear))
 
       val dividendsToAdd = parameterDividends.allCompanyEntriesOfOneDailyParam.filter(param =>
         intersectAllThreeDailyParamsYears.contains(param.date.dateExtended.getYear))
@@ -91,6 +93,7 @@ object DefaultFilters {
       * Provided the consistent years, it creates new CompanyYearlyFinParameter from the current one, that is consistent
       * with the provided years. The parameters allCompanyEntries and companyYearlyFinParameter are only used inside its
       * implementation. Only consistentYears should be provided as an input parameter.
+ *
       * @param consistentYears - hose are the years we are sure to be consistent
       * @return
       */
@@ -100,7 +103,7 @@ object DefaultFilters {
 
 
       @tailrec
-      def recursivelyIterateConsistentYears(allEntries: List[YearlyFinDataEntry],
+      def recursivelyIterateConsistentYears(allEntries: List[CompanyYearlyFinDataEntry],
                                             yearlyFinParameter: CompanyYearlyFinParameter): CompanyYearlyFinParameter =
         allEntries match {
           case Nil =>

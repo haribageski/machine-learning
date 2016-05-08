@@ -7,9 +7,6 @@ import org.joda.time.format._
   * Ordered Joda DateTime in format dd/MM/yyyy.
   */
 case class DateExtended (date: String) {
-
-  //implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
-
   val dateExtended: DateTime = DateExtended.fromString(date)
 
   override def hashCode: Int = dateExtended.hashCode

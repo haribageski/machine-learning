@@ -1,9 +1,13 @@
 package utils.ordered
 
 import dailyFinancialParameters.CompanyDailyFinDataEntry
-import utils.{SymYear, DateExtended, SymDate}
+import utils.{DateExtended, SymDate, SymYear}
+import yearlyFinancialParameters.CompanyYearlyFinDataEntry
 
-object DefaultOrdered {
+/**
+  * Set of interface-classes that wrap a class and make it Ordered.
+  */
+object OrderedSyntax {
 
   implicit class OrderedDateExtended(dateExtended: DateExtended) extends Ordered[DateExtended] {
     override def compare(other: DateExtended): Int = {
@@ -29,6 +33,13 @@ object DefaultOrdered {
     extends Ordered[CompanyDailyFinDataEntry] {
     def compare(that: CompanyDailyFinDataEntry) = {
       companyDailyFinDataEntry.value.compareTo(that.value)
+    }
+  }
+
+  implicit class OrderedCompanyYearlyFinDataEntry(companyYearlyFinDataEntry: CompanyYearlyFinDataEntry)
+    extends Ordered[CompanyYearlyFinDataEntry] {
+    def compare(that: CompanyYearlyFinDataEntry) = {
+      companyYearlyFinDataEntry.value.compareTo(that.value)
     }
   }
 }
