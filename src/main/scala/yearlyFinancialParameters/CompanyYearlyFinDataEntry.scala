@@ -16,15 +16,15 @@ case class CompanyYearlyFinDataEntry(symbol: String, value: Double, year: Int)  
     CompanyYearlyFinDataEntry(symbol, v, year)
   }
 
-  def canEqual(other: Any): Boolean = {
-    other.isInstanceOf[CompanyYearlyFinDataEntry]
-  }
+//  def canEqual(other: Any): Boolean = {
+//    other.isInstanceOf[CompanyYearlyFinDataEntry]
+//  }
 
-  override def equals(other: Any) = other match {
-    case that: CompanyYearlyFinDataEntry =>
-      canEqual(other) && (that.symbol == symbol) && (that.value == value) && (that.year == year)
-    case _ => false
-  }
+//  override def equals(other: Any) = other match {
+//    case that: CompanyYearlyFinDataEntry =>
+//      canEqual(other) && (that.symbol == symbol) && (that.value == value) && (that.year == year)
+//    case _ => false
+//  }
 //
 //  override def compare(that: CompanyYearlyFinDataEntry) = {
 //    //System.out.println(s"Comparing $value with ${that.value}:" + value.compareTo(that.value))

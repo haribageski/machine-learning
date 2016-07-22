@@ -40,8 +40,6 @@ class DateExtendedTest extends FlatSpec with Matchers {
   "DateExtended.equals" should "return true for two DateExtended with same date" in {
     dateExtended1 == DateExtended("01/01/2016") should be(true)
     dateExtended1 == dateExtended2 should be(false)
-    dateExtended1 == "01/01/2016" should be(false)
-    dateExtended2 == 1 should be(false)
   }
 
   "DateExtended(val: String)" should "throw IllegalArgumentException in" in {

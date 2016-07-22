@@ -9,8 +9,8 @@ case class CompanyDailyFinData(symbol: String,
 
 
 
-  override def toString =
-    s"dividends: $parameterDividends;\n quotes: $parameterQuotes;\n SUE: $parameterSUEs"
+//  override def toString =
+//    s"dividends: $parameterDividends;\n quotes: $parameterQuotes;\n SUE: $parameterSUEs"
 }
 
 object CompanyDailyFinData {

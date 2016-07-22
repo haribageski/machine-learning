@@ -9,8 +9,8 @@ case class CompanyYearlyFinData (
                              rOE: CompanyYearlyFinParameter,
                              accrual: CompanyYearlyFinParameter
                            ) {
-  override def toString =
-  s"symbol: $symbol;\n bookValue: $bookValue;\n shares: $shares;\n ROE: $rOE;\n accrual: $accrual"
+//  override def toString =
+//  s"symbol: $symbol;\n bookValue: $bookValue;\n shares: $shares;\n ROE: $rOE;\n accrual: $accrual"
 }
 
 

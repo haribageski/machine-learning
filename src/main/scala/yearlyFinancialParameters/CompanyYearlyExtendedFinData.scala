@@ -14,13 +14,11 @@ case class CompanyYearlyExtendedFinData(companyYearlyFinData: CompanyYearlyFinDa
                                         companySize: Option[CompanyYearlyFinParameter] = None
                                        ) {
     /**
-    * Given the yearly parameters in CompanyYearlyFinData and the daily parameters, it finds parameterMarketValues,
-    * parameterBMratio, and parameterSize. Then it returns new CompanyYearlyExtendedFinData with the three derived
-    * parameters included.
-    * The entries will be a set of SymDates that is the intersection of all the yearly parameters entries and all the
-    * daily parameters.
- *
-    * @return
+      * Given the yearly parameters in CompanyYearlyFinData and the daily parameters in companyDailyFinData,
+      * it finds parameterMarketValues, parameterBMratio, and parameterSize. Then it returns
+      * new CompanyYearlyExtendedFinData with the three derived parameters included.
+      * The entries will be a set of SymDates that is the intersection of all the yearly parameters entries and all the
+      * daily parameters.
     */
   def deriveAdditionalFinParameters(): CompanyYearlyExtendedFinData = {
     val symYears = companyYearlyFinData.bookValue.perYearM.keySet
@@ -72,17 +70,13 @@ case class CompanyYearlyExtendedFinData(companyYearlyFinData: CompanyYearlyFinDa
   /**
     * Finds nonzero MarketValue using average per year quotes and yearly share for all years from the input parameter.
     * If for some year is not possible, then the returning list will not contain any MarketValue for that year.
- *
-    * @param marketVals: List[YearlyFinDataEntry] = Nil, symYears: Set[SymYear]
-    * @return
     */
   @tailrec
   private def findMarketValuesToAdd(marketVals: List[CompanyYearlyFinDataEntry] = Nil, symYears: Set[SymYear]):
   List[CompanyYearlyFinDataEntry] = {
-    symYears.isEmpty match {
-      case true => marketVals
-      case false =>
-        val head = symYears.head
+    if(symYears.isEmpty)    marketVals
+    else {
+        val head = symYears.headOption.getOrElse(SymYear("", 0))    //TODO: fix me
         val sym = head.sym
         val year = head.year
 

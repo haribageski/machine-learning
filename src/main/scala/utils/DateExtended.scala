@@ -2,6 +2,7 @@ package utils
 
 import org.joda.time.DateTime
 import org.joda.time.format._
+import scala.language.implicitConversions
 
 /**
   * Ordered Joda DateTime in format dd/MM/yyyy.

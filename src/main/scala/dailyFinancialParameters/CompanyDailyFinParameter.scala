@@ -3,7 +3,7 @@ package dailyFinancialParameters
 import utils.DateExtended
 import scala.annotation.tailrec
 import scala.collection.immutable.TreeSet
-
+import utils.ordered.OrderedSyntax.{OrderedCompanyDailyFinDataEntry, OrderedDateExtended}
 
 case class CompanyDailyFinParameter(symbol: String,
                                     oldestEntryO: Option[CompanyDailyFinDataEntry],
@@ -25,7 +25,6 @@ case class CompanyDailyFinParameter(symbol: String,
     * @return
     */
   def addEntry(entry: CompanyDailyFinDataEntry): CompanyDailyFinParameter = {
-    import utils.ordered.OrderedSyntax.{OrderedCompanyDailyFinDataEntry, OrderedDateExtended}
 
     if (entry.symbol == symbol) {
       val year = entry.date.dateExtended.getYear
@@ -37,18 +36,18 @@ case class CompanyDailyFinParameter(symbol: String,
           new CompanyDailyFinParameter(symbol, Some(entry), Some(entry), List(entry), Map(year -> TreeSet(entry)))
 
         case l: List[CompanyDailyFinDataEntry] =>
-          if (entry.date > oldestEntryO.get.date && entry.date < earliestEntryO.get.date)
+          if (oldestEntryO.forall(_.date <= entry.date) && earliestEntryO.forall(_.date >= entry.date))
             this.copy(
               allCompanyEntriesOfOneDailyParam = entry :: l,
               groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
             )
-          else if (entry.date < oldestEntryO.get.date)
+          else if (oldestEntryO.forall(_.date >= entry.date))
             this.copy(
               oldestEntryO = Some(entry),
               allCompanyEntriesOfOneDailyParam = entry :: l,
               groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
             )
-          else if (entry.date > earliestEntryO.get.date)
+          else if (earliestEntryO.forall(_.date <= entry.date))
             this.copy(
               earliestEntryO = Some(entry),
               allCompanyEntriesOfOneDailyParam = entry :: l,

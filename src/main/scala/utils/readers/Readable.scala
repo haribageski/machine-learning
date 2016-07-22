@@ -7,6 +7,8 @@ import yearlyFinancialParameters.{CompanyYearlyFinData, CompanyYearlyFinParamete
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.io.Source._
+import better.files._
+import java.io.{File => JFile}
 
 trait ReadableParameter[A] {
   def readParameterFromFile(filePath: String, symbol: String, indexOfValue: Int): A
@@ -183,14 +185,13 @@ object ReadableDefaults {
 
   implicit object ColumnsReader extends ReadableColumns {
     def readColumnsFromFile(filePath: String): List[List[String]] = {
-      val lines = readFile(filePath)
+      val lines: Traversable[String] = readFile(filePath)
       findColumnsFromInputLines(lines, ListBuffer.empty[List[String]])
     }
 
-    private def readFile(filePath: String): List[String] = {
-      val source = fromFile(filePath)
-      try source.getLines.toList
-      finally source.close()
+    private def readFile(filePath: String): Traversable[String] = {
+      val file = File(filePath)
+      file.lines
     }
 
     /**
@@ -201,10 +202,12 @@ object ReadableDefaults {
       * @return
       */
     @tailrec
-    private def findColumnsFromInputLines(lines: List[String], columns: ListBuffer[List[String]]): List[List[String]] =
-      lines match {
-        case Nil => columns.reverse.toList
-        case currentLine :: tailLines =>
+    private def findColumnsFromInputLines(lines: Traversable[String], columns: ListBuffer[List[String]]): List[List[String]] =
+      lines.isEmpty match {
+        case true => columns.reverse.toList
+        case false =>
+          val currentLine = lines.head
+          val tailLines = lines.tail
           val columnsInCurrentLine: Array[String] = currentLine.split("\\t")
           val validLine: Boolean = columnsInCurrentLine.forall {
             case "NaN" | "" | "null" => false

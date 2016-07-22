@@ -30,20 +30,20 @@ case class CompanyYearlyFinParameter(symbol: String,
           CompanyYearlyFinParameter(symbol, Some(entry), Some(entry), TreeMap(symYear -> entry), List(entry))
 
         case l: List[CompanyYearlyFinDataEntry] =>
-          if (entry.year > oldestEntryOpt.get.year && entry.year < earliestEntryOpt.get.year) {
+          if (oldestEntryOpt.forall(_.year <= entry.year) && earliestEntryOpt.forall(_.year >= entry.year)) {
             this.copy(
               perYearM = perYearM + (symYear -> entry),
               allCompanyEntriesOfOneYearlyParam = entry :: l
             )
           }
-          else if (entry.year < oldestEntryOpt.get.year && entry.year < earliestEntryOpt.get.year) {
+          else if (oldestEntryOpt.forall(_.year >= entry.year) && earliestEntryOpt.forall(_.year >= entry.year )) {
             this.copy(
               oldestEntryOpt = Some(entry),
               perYearM = perYearM + (symYear -> entry),
               allCompanyEntriesOfOneYearlyParam = entry :: l
             )
           }
-          else if (entry.year > oldestEntryOpt.get.year && entry.year > earliestEntryOpt.get.year) {
+          else if (oldestEntryOpt.forall(_.year <= entry.year) && earliestEntryOpt.forall(_.year <= entry.year)) {
             this.copy(
               earliestEntryOpt = Some(entry),
               perYearM = perYearM + (symYear -> entry),
@@ -75,8 +75,8 @@ case class CompanyYearlyFinParameter(symbol: String,
 
 
 
-  override def toString =
-    s"symbol: $symbol, oldest: $oldestEntryOpt, earliest: $earliestEntryOpt, all entries: $allCompanyEntriesOfOneYearlyParam"
+//  override def toString =
+//    s"symbol: $symbol, oldest: $oldestEntryOpt, earliest: $earliestEntryOpt, all entries: $allCompanyEntriesOfOneYearlyParam"
 }
 
 

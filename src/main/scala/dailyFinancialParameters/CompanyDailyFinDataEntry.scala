@@ -4,11 +4,11 @@ import utils.DateExtended
 
 case class CompanyDailyFinDataEntry(symbol: String, value: Double, date: DateExtended)  {
   def setDate(d: DateExtended): CompanyDailyFinDataEntry = {
-    CompanyDailyFinDataEntry(symbol, value, d)
+    copy(date = d)
   }
 
   def setVal(v: Double): CompanyDailyFinDataEntry = {
-    CompanyDailyFinDataEntry(symbol, v, date)
+    copy(value = v)
   }
 
 //  def canEqual(other: Any): Boolean = {

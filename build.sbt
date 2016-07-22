@@ -6,10 +6,17 @@ version := "1.0"
 
 scalaVersion := "2.11.7"
 
+scapegoatVersion := "1.1.0"
+
+val betterFilesVersion = "2.16.0"
+
+resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
+
 libraryDependencies ++= Seq(
   "joda-time" % "joda-time" % "2.9.1",
   "org.scalatest" %% "scalatest" % "2.2.6" % "test",
-  "org.typelevel" %% "cats" % "0.4.0"
+  "org.typelevel" %% "cats" % "0.4.0",
+  "com.github.pathikrit" %% "better-files" % betterFilesVersion
 )
 
 scalacOptions in ThisBuild ++= Seq(

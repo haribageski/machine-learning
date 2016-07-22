@@ -6,3 +6,4 @@ target
 /.project
 resources
 /RUNNING_PID
+/node_modules

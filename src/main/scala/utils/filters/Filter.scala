@@ -147,7 +147,7 @@ object DefaultFilters {
       //persistent entries in the extended parameters are those in BMratio
       val sym = companyYearlyFinData.symbol
       val consistentEntries: Set[Int] = companyBMratio match {
-        case None => Set()
+        case None => Set.empty
         case Some(set) => set.perYearM.keySet.map(_.year)
       }
 
