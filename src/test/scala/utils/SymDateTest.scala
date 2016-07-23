@@ -44,12 +44,9 @@ class SymDateTest extends FlatSpec with Matchers {
   }
 
   "SymDate.equals" should "return true for two DateExtended with same symbol name and date" in {
-    import utils.cats_Eq.EqDefaults._
-    import cats.syntax.eq._
-    import utils.cats_Eq.EqSyntax._
 
     symDate1 == symDate1 should be(true)
-    symDate1 equals symDate6 should be(true)
+    symDate1 == symDate6 should be(true)
     symDate1 == symDate2 should be(false)
     symDate1 == "01/01/2016" should be(false)
     symDate2 == 1 should be(false)

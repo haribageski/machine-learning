@@ -36,7 +36,8 @@ class CompanyDailyFinDataEntryTest extends FlatSpec with Matchers {
     dailyFinData1 == dailyFinData2 should be(true)
     dailyFinData1 == dailyFinData3 should be(false)
     dailyFinData1 == dailyFinData4 should be(false)
-    dailyFinData1 == dailyFinData5 should be(false)
+    dailyFinData1 == dailyFinData5 should be(true)
+    dailyFinData1 == "01/01/2015" should be(false)
     dailyFinData1 < dailyFinData3 should be(false)
     dailyFinData1 < dailyFinData4 should be(true)
   }

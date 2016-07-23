@@ -209,13 +209,12 @@ object ReadableDefaults {
           val currentLine = lines.head
           val tailLines = lines.tail
           val columnsInCurrentLine: Array[String] = currentLine.split("\\t")
-          val validLine: Boolean = columnsInCurrentLine.forall {
-            case "NaN" | "" | "null" => false
-            case _ => true
+          val validLine: Boolean = columnsInCurrentLine.forall { p =>
+            p != "NaN" && !p.isEmpty && p != "\"\"" && p != "null"
           }
           validLine match {
             case false => findColumnsFromInputLines(tailLines, columns)
-            case _ => findColumnsFromInputLines(tailLines, columns += columnsInCurrentLine.toList)
+            case true => findColumnsFromInputLines(tailLines, columns += columnsInCurrentLine.toList)
           }
       }
   }

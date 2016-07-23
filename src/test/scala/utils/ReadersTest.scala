@@ -10,12 +10,29 @@ import scala.collection.immutable.TreeSet
 class ReadersTest  extends FlatSpec with Matchers {
   "readColumn()" should "return the columns as List[List[String]], the first list being the list of all lines" in {
     val filePath = "resources/dividends/NOOF.txt"
+    val filePath2 = "resources/dividends/wrongFormat.txt"
+
     ColumnsReader.readColumnsFromFile(filePath) should be (
+    List(
+    List("NOOF", "19/03/2008", "0.125"), List("NOOF", "19/12/2007", "0.125"),
+    List("NOOF", "13/09/2007", "0.125"), List("NOOF", "31/05/2007", "0.125")
+    )
+    )
+    ColumnsReader.readColumnsFromFile(filePath2) should be (
       List(
-        List("NOOF", "19/03/2008", "0.125"), List("NOOF", "19/12/2007", "0.125"),
-        List("NOOF", "13/09/2007", "0.125"), List("NOOF", "31/05/2007", "0.125")
+        List("A", "27/03/2015", "0.1")
       )
     )
+//    ColumnsReader.readColumnsFromFile(filePath2 + "2") should be (
+//      List(
+//        List("A", "27/03/2015", "0.1")
+//      )
+//    )
+//    ColumnsReader.readColumnsFromFile(filePath2 + "3") should be (
+//      List(
+//        List("A", "27/03/2015", "0.1")
+//      )
+//    )
   }
 
   "readCompanyDividends() " should "read all CompanyDailyFinParameter dividends of the company from file" in {

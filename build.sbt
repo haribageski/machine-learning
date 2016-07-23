@@ -29,5 +29,5 @@ scalacOptions in ThisBuild ++= Seq(
 )
 
 fork in run := true
-
 connectInput in run := true   // this is needed because by default, the standard input of the sbt process is not forwarded to the forked process
+coverageEnabled := true

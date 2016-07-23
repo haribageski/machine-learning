@@ -43,21 +43,20 @@ case class CompanyYearlyFinParameter(symbol: String,
               allCompanyEntriesOfOneYearlyParam = entry :: l
             )
           }
-          else if (oldestEntryOpt.forall(_.year <= entry.year) && earliestEntryOpt.forall(_.year <= entry.year)) {
+          else //if (oldestEntryOpt.forall(_.year <= entry.year) && earliestEntryOpt.forall(_.year <= entry.year)) {
             this.copy(
               earliestEntryOpt = Some(entry),
               perYearM = perYearM + (symYear -> entry),
               allCompanyEntriesOfOneYearlyParam = entry :: l
             )
-          }
-          else {
-            this.copy(
-              oldestEntryOpt = Some(entry),
-              earliestEntryOpt = Some(entry),
-              perYearM = perYearM + (symYear -> entry),
-              allCompanyEntriesOfOneYearlyParam = entry :: l
-            )
-          }
+//          else {
+//            this.copy(
+//              oldestEntryOpt = Some(entry),
+//              earliestEntryOpt = Some(entry),
+//              perYearM = perYearM + (symYear -> entry),
+//              allCompanyEntriesOfOneYearlyParam = entry :: l
+//            )
+//          }
       }
     }
     else {

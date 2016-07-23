@@ -10,7 +10,15 @@ import scala.language.implicitConversions
 case class DateExtended (date: String) {
   val dateExtended: DateTime = DateExtended.fromString(date)
 
-  override def hashCode: Int = dateExtended.hashCode
+  /**
+    * @return negative value if this is less, 0 if equal, or positive value if greater
+    * @throws NullPointerException if the object is null
+    * @throws ClassCastException if the object type is not supported
+    */
+  override def equals(that: Any) = that match {
+    case that: DateExtended => dateExtended.equals(that.dateExtended)
+    case _ => false
+  }
 }
 
 

@@ -20,13 +20,6 @@ class DateExtendedTest extends FlatSpec with Matchers {
     DateExtended("01/01/2016").dateExtended should be(DateTimeFormat.forPattern("dd/MM/yyyy").parseDateTime("01/01/2016"))
   }
 
-  "DateExtended.canEqual(other)" should "return true for other of type DateExtended" in  {
-
-    dateExtended1.canEqual(dateExtended1) should be(true)
-    dateExtended1.canEqual(dateExtended2) should be(true)
-    dateExtended1.canEqual(2) should be(false)
-    dateExtended1.canEqual("01/01/2016") should be(false)
-  }
 
   "DateExtended.compare(other)" should "compare this with, other used for sorting" in  {
     dateExtended1.compareTo(dateExtended1) == 0 should be(true)
@@ -40,6 +33,8 @@ class DateExtendedTest extends FlatSpec with Matchers {
   "DateExtended.equals" should "return true for two DateExtended with same date" in {
     dateExtended1 == DateExtended("01/01/2016") should be(true)
     dateExtended1 == dateExtended2 should be(false)
+    dateExtended1 == "" should be(false)
+    dateExtended1 == ("01/01/2016") should be(false)
   }
 
   "DateExtended(val: String)" should "throw IllegalArgumentException in" in {

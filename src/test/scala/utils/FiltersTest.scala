@@ -1,11 +1,12 @@
 package utils
 
-import dailyFinancialParameters.{CompanyDailyFinDataEntry, CompanyDailyFinParameter}
+import dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
 import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
-import yearlyFinancialParameters.{CompanyYearlyFinParameter, CompanyYearlyFinDataEntry}
+import yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import utils.filters.DefaultFilters._
 import utils.filters.FilterSyntax.FilterOps
+
 import scala.collection.immutable.TreeSet
 
 class FiltersTest extends FlatSpec with Matchers {
@@ -57,5 +58,18 @@ class FiltersTest extends FlatSpec with Matchers {
     companyYearlyFinParameter3.filter(Set(2015)) should be (companyYearlyFinParameter2)
     companyYearlyFinParameter3.filter(Set.empty[Int]) should be(companyYearlyFinParameter1)
     companyYearlyFinParameter3.filter(Set(2015, 2014)) should be(companyYearlyFinParameter3)
+  }
+
+  "filter" should "return an empty set if rOE has no consistent years" in {
+
+    val companyYearlyFinParameter1: CompanyYearlyFinParameter = CompanyYearlyFinParameter("A")
+    val entry1 = CompanyYearlyFinDataEntry("A", 124.2, 2015)
+    val companyYearlyFinParameter2 = companyYearlyFinParameter1.addEntry(entry1)
+
+    val companyYearlyFinData =
+      CompanyYearlyFinData("A", companyYearlyFinParameter2, companyYearlyFinParameter2, CompanyYearlyFinParameter("A"), companyYearlyFinParameter2)
+    val companyDailyFinData = CompanyDailyFinData("A")
+    val company = CompanyYearlyExtendedFinData(companyYearlyFinData, companyDailyFinData, None, None, None)
+    company.filter should be (company.copy(CompanyYearlyFinData("A"), CompanyDailyFinData("A")))
   }
 }

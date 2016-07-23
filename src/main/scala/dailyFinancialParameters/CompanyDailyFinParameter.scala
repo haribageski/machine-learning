@@ -47,19 +47,19 @@ case class CompanyDailyFinParameter(symbol: String,
               allCompanyEntriesOfOneDailyParam = entry :: l,
               groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
             )
-          else if (earliestEntryO.forall(_.date <= entry.date))
+          else //if (earliestEntryO.forall(_.date <= entry.date))
             this.copy(
               earliestEntryO = Some(entry),
               allCompanyEntriesOfOneDailyParam = entry :: l,
               groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
             )
-          else
-            this.copy(
-              oldestEntryO = Some(entry),
-              earliestEntryO = Some(entry),
-              allCompanyEntriesOfOneDailyParam = entry :: l,
-              groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
-            )
+//          else
+//            this.copy(
+//              oldestEntryO = Some(entry),
+//              earliestEntryO = Some(entry),
+//              allCompanyEntriesOfOneDailyParam = entry :: l,
+//              groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
+//            )
       }
     }
     else {

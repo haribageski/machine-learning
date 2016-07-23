@@ -76,7 +76,7 @@ case class CompanyYearlyExtendedFinData(companyYearlyFinData: CompanyYearlyFinDa
   List[CompanyYearlyFinDataEntry] = {
     if(symYears.isEmpty)    marketVals
     else {
-        val head = symYears.headOption.getOrElse(SymYear("", 0))    //TODO: fix me
+        val head = symYears.head
         val sym = head.sym
         val year = head.year
 
