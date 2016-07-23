@@ -13,11 +13,13 @@ val betterFilesVersion = "2.16.0"
 resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 libraryDependencies ++= Seq(
+  // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
   "joda-time" % "joda-time" % "2.9.1",
+//  "onlinenewsmachinelearning" % "onlinenewsmachinelearning_2.11" % "1.0"  exclude("org.slf4j", "slf4j-jdk14"),
   "org.scalatest" %% "scalatest" % "2.2.6" % "test",
   "org.typelevel" %% "cats" % "0.4.0",
   "com.github.pathikrit" %% "better-files" % betterFilesVersion
-)
+).map(_.exclude("ch.qos.logback", "logback-classic"))
 
 scalacOptions in ThisBuild ++= Seq(
   "-target:jvm-1.8",

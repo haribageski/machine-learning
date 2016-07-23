@@ -135,7 +135,7 @@ object DefaultFilters {
     /**
       * Deletes the inconsistent entries that have data for some but not all parameters. It does that by
       * tail-recursively iterating through all the entries of each parameter, and tail-recursively constructing new
-      * parameters. NaN values are already filtered.
+      * parameters. NaN values are already filtered out.
       */
     override def applyFilter(companyYearlyExtendedFinData: CompanyYearlyExtendedFinData): CompanyYearlyExtendedFinData = {
       val companyYearlyFinData = companyYearlyExtendedFinData.companyYearlyFinData

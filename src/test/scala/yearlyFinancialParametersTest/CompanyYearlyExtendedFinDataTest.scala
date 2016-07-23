@@ -1,116 +1,97 @@
 package yearlyFinancialParametersTest
 
-import dailyFinancialParameters.CompanyDailyFinData
-import utils.ordered.OrderedSyntax.OrderedSymYear
+import dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
+import utils.ordered.OrderedSyntax._
 import org.scalatest.{FlatSpec, Matchers}
-import utils.SymYear
+import utils.{DateExtended, SymYear}
+import utils.filters.DefaultFilters.CompanyYearlyExtendedFinDataFilter
 import utils.readers.ReadableDefaults.CompanyDailyFinDataReader
+import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader.readDataFromFile
 import yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 
-import scala.collection.immutable.TreeMap
+import scala.collection.immutable.{TreeMap, TreeSet}
+import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader._
 
 class CompanyYearlyExtendedFinDataTest  extends FlatSpec with Matchers {
-  "deriveAdditionalFinParameters() and filterInconsistentEntries()" should "derive MarketVal, BMratio, and Size" in {
 
+  val sym = "Example"
+  val companyYearlyExtendedFinData = CompanyYearlyExtendedFinData(
+    readDataFromFile(sym),
+    CompanyDailyFinDataReader.readDataFromFile(sym)
+  )
+  println("companyYearlyExtendedFinData:" + companyYearlyExtendedFinData)
+  val companyYearlyExtendedWithDerivedParams: CompanyYearlyExtendedFinData =
+    companyYearlyExtendedFinData.deriveAdditionalFinParameters()
+
+  val entry1 = CompanyYearlyFinDataEntry(sym, 100000, 2014)
+  val marketVal = CompanyYearlyFinParameter(
+    sym, Some(entry1), Some(entry1), TreeMap(SymYear(sym, 2014) -> entry1), List(entry1)
+  )
+  val entry2 = CompanyYearlyFinDataEntry(sym, -4, 2014)
+  val bMratio = CompanyYearlyFinParameter(
+    sym, Some(entry2), Some(entry2), TreeMap(SymYear(sym, 2014) -> entry2), List(entry2)
+  )
+  val entry3 = CompanyYearlyFinDataEntry(sym, 5, 2014)
+  val sizeP = CompanyYearlyFinParameter(
+    sym, Some(entry3), Some(entry3), TreeMap(SymYear(sym, 2014) -> entry3), List(entry3)
+  )
+
+  val companyYearlyExtendedFinDataWithAllParams = CompanyYearlyExtendedFinData(
+    readDataFromFile(sym),
+    CompanyDailyFinDataReader.readDataFromFile(sym),
+    Some(marketVal),
+    Some(bMratio),
+    Some(sizeP)
+  )
+
+  "deriveAdditionalFinParameters()" should "derive MarketVal, BMratio, and Size" in {
+    //three derived parameters
+    companyYearlyExtendedWithDerivedParams.companyMarketValues.foreach(_ should be(marketVal))
+    companyYearlyExtendedWithDerivedParams.companyBMratio.foreach(_ should be(bMratio))
+    companyYearlyExtendedWithDerivedParams.companySize.foreach(_ should be(sizeP))
+  }
+
+
+  "filterInconsistentEntries()" should "filter out inconsistent entries" in {
     import utils.filters.DefaultFilters.CompanyYearlyExtendedFinDataFilter
     import utils.filters.FilterSyntax.FilterOps
-    import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader._
+    val filtered: CompanyYearlyExtendedFinData = companyYearlyExtendedWithDerivedParams.filter
 
-    val sym = "Example"
-    val companyYearlyExtendedFinData = CompanyYearlyExtendedFinData(
-      readDataFromFile(sym),
-      CompanyDailyFinDataReader.readDataFromFile(sym)
-    )
-    val companyYearlyExtendedWithDerivedParams: CompanyYearlyExtendedFinData =
-      companyYearlyExtendedFinData.deriveAdditionalFinParameters()
-
-    //printing the three derived parameters
-    companyYearlyExtendedWithDerivedParams.companyMarketValues.foreach(m =>
-      m.allCompanyEntriesOfOneYearlyParam.head
-        should be(CompanyYearlyFinDataEntry(sym, 100000, 2014)
-      )
-    )
-    companyYearlyExtendedWithDerivedParams.companyBMratio.foreach(m =>
-      m.allCompanyEntriesOfOneYearlyParam.head
-        should be(CompanyYearlyFinDataEntry(sym, -4, 2014)
-      )
-    )
-    companyYearlyExtendedWithDerivedParams.companySize.foreach(m =>
-      m.allCompanyEntriesOfOneYearlyParam.head
-        should be(CompanyYearlyFinDataEntry(sym, 5, 2014)
-      )
+    val divi1 = CompanyDailyFinDataEntry(sym, 0.01, DateExtended("30/03/2014"))
+    val divi2 = CompanyDailyFinDataEntry(sym, 0.02, DateExtended("09/04/2014"))
+    val dividend = CompanyDailyFinParameter(
+      sym,
+      Some(divi1),
+      Some(divi2),
+      List(divi2, divi1),
+      Map(2014 -> TreeSet(divi1, divi2))
     )
 
-    val entry1 = CompanyYearlyFinDataEntry("A", 10, 2014)
-    val marketVal = CompanyYearlyFinParameter(
-      "A", Some(entry1), Some(entry1), TreeMap(SymYear("A", 2014) -> entry1), List(entry1)
-    )
-    val entry2 = CompanyYearlyFinDataEntry("A", 5000, 2014)
-    val bMratio = CompanyYearlyFinParameter(
-      "A", Some(entry2), Some(entry2), TreeMap(SymYear("A", 2014) -> entry2), List(entry2)
-    )
-    val entry3 = CompanyYearlyFinDataEntry("A", 1.12999999523163, 2014)
-    val size = CompanyYearlyFinParameter(
-      "A", Some(entry3), Some(entry3), TreeMap(SymYear("A", 2014) -> entry3), List(entry3)
+    val quote1 = CompanyDailyFinDataEntry(sym, 18, DateExtended("04/01/2014"))
+    val quote2 = CompanyDailyFinDataEntry(sym, 22, DateExtended("04/04/2014"))
+    val quote = CompanyDailyFinParameter(
+      sym,
+      Some(quote1),
+      Some(quote2),
+      List(quote2, quote1),
+      Map(2014 -> TreeSet(quote1, quote2))
     )
 
-    val companyYearlyExtendedFinDataWithAllParamsFilled = CompanyYearlyExtendedFinData(
-      readDataFromFile(sym),
-      CompanyDailyFinDataReader.readDataFromFile(sym),
-      Some(marketVal),
-      Some(bMratio),
-      Some(size)
-    )
-    val companyYearlyExtendedFromFileAndManual: CompanyYearlyExtendedFinData =
-      companyYearlyExtendedFinDataWithAllParamsFilled.deriveAdditionalFinParameters()
-
-    //printing the three derived parameters
-    companyYearlyExtendedFromFileAndManual.companyMarketValues.foreach(m =>
-      m.allCompanyEntriesOfOneYearlyParam.head
-        should be (entry1)
-    )
-    companyYearlyExtendedFromFileAndManual.companyBMratio.foreach(m =>
-      m.allCompanyEntriesOfOneYearlyParam.head
-        should be (entry2)
-    )
-    companyYearlyExtendedFromFileAndManual.companySize.foreach(m =>
-      m.allCompanyEntriesOfOneYearlyParam.head
-        should be(entry3)
+    val sue1 = CompanyDailyFinDataEntry(sym, -1.12000000476837, DateExtended("17/11/2014"))
+    val sue2 = CompanyDailyFinDataEntry(sym, 1.51999998092651, DateExtended("13/02/2014"))
+    val sue = CompanyDailyFinParameter(
+      sym,
+      Some(sue2),
+      Some(sue1),
+      List(sue1, sue2),
+      Map(2014 -> TreeSet(sue1, sue2))
     )
 
-
-    val filteredcompanyYearlyExtendedWithDerivedParams: CompanyYearlyExtendedFinData =
-      companyYearlyExtendedWithDerivedParams.filter(CompanyYearlyExtendedFinDataFilter)
-    filteredcompanyYearlyExtendedWithDerivedParams.companyBMratio.forall(
-      _.perYearM(SymYear(sym, 2014)).year == 2014)  should be (true)
-    filteredcompanyYearlyExtendedWithDerivedParams.companyMarketValues.forall(
-      _.perYearM(SymYear(sym, 2014)).year == 2014)  should be (true)
-    filteredcompanyYearlyExtendedWithDerivedParams.companySize.forall(
-      _.perYearM(SymYear(sym, 2014)).year == 2014)  should be (true)
-    filteredcompanyYearlyExtendedWithDerivedParams.companyMarketValues.forall(
-      _.perYearM(SymYear(sym, 2014)).year == 2014)  should be (true)
-
-    filteredcompanyYearlyExtendedWithDerivedParams
-      .companyYearlyFinData
-      .accrual
-      .allCompanyEntriesOfOneYearlyParam
-      .forall(_.year == 2014) should be (true)
-    filteredcompanyYearlyExtendedWithDerivedParams
-      .companyYearlyFinData
-      .bookValue
-      .allCompanyEntriesOfOneYearlyParam
-      .forall(_.year == 2014) should be (true)
-    filteredcompanyYearlyExtendedWithDerivedParams
-      .companyYearlyFinData
-      .rOE
-      .allCompanyEntriesOfOneYearlyParam
-      .forall(_.year == 2014) should be (true)
-    filteredcompanyYearlyExtendedWithDerivedParams
-      .companyYearlyFinData
-      .shares
-      .allCompanyEntriesOfOneYearlyParam
-      .forall(_.year == 2014) should be (true)
-
-    1 should be (1)   //TODO: Do appropriate testing
+    filtered.companyMarketValues.foreach(_ should be(marketVal))
+    filtered.companyBMratio.foreach(_ should be(bMratio))
+    filtered.companySize.foreach(_ should be(sizeP))
+    filtered.companyDailyFinData.parameterDividends should be(dividend)
+    filtered.companyDailyFinData.parameterQuotes should be(quote)
+    filtered.companyDailyFinData.parameterSUEs should be(sue)
   }
 }

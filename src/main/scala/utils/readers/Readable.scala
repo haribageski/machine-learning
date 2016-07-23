@@ -51,30 +51,12 @@ object ReadableDefaults {
       entriesRead
     }
 
-    /**
-      * Test: utils.ReadersTest
-      *
-      * @param symbol
-      * @return
-      */
     def readDividendFromFile(symbol: String) =
       readParameterFromFile("resources/dividends/" + symbol + ".txt", symbol, 2)
 
-    /**
-      * Test: utils.ReadersTest
-      *
-      * @param symbol
-      * @return
-      */
     def readQuotesFromFile(symbol: String) =
       readParameterFromFile("resources/quotes-prices/" + symbol + ".txt", symbol, 3)
 
-    /**
-      * Test: utils.ReadersTest
-      *
-      * @param symbol
-      * @return
-      */
     def readEarningSurpriseFromFile(symbol: String) =
       readParameterFromFile("resources/earning-surprises/" + symbol + ".txt", symbol, 2)
   }
@@ -156,7 +138,6 @@ object ReadableDefaults {
             symbol, line(5).toDouble, DateExtended(line(1)).dateExtended.getYear
           )
         )
-
 
       val emptyBookValue = CompanyYearlyFinParameter(symbol)
       val emptyShares = CompanyYearlyFinParameter(symbol)

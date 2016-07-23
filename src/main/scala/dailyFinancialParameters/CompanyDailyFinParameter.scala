@@ -28,7 +28,7 @@ case class CompanyDailyFinParameter(symbol: String,
 
     if (entry.symbol == symbol) {
       val year = entry.date.dateExtended.getYear
-      val valuesInYear: TreeSet[CompanyDailyFinDataEntry] = groupedByYearM.getOrElse(year, TreeSet())
+      val mapValueTotalPerYear: TreeSet[CompanyDailyFinDataEntry] = groupedByYearM.getOrElse(year, TreeSet())
 
       allCompanyEntriesOfOneDailyParam match {
         //this is the case when we add the first dividend
@@ -39,26 +39,26 @@ case class CompanyDailyFinParameter(symbol: String,
           if (oldestEntryO.forall(_.date <= entry.date) && earliestEntryO.forall(_.date >= entry.date))
             this.copy(
               allCompanyEntriesOfOneDailyParam = entry :: l,
-              groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
+              groupedByYearM = groupedByYearM + (year -> (mapValueTotalPerYear + entry))
             )
           else if (oldestEntryO.forall(_.date >= entry.date))
             this.copy(
               oldestEntryO = Some(entry),
               allCompanyEntriesOfOneDailyParam = entry :: l,
-              groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
+              groupedByYearM = groupedByYearM + (year -> (mapValueTotalPerYear + entry))
             )
           else //if (earliestEntryO.forall(_.date <= entry.date))
             this.copy(
               earliestEntryO = Some(entry),
               allCompanyEntriesOfOneDailyParam = entry :: l,
-              groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
+              groupedByYearM = groupedByYearM + (year -> (mapValueTotalPerYear + entry))
             )
 //          else
 //            this.copy(
 //              oldestEntryO = Some(entry),
 //              earliestEntryO = Some(entry),
 //              allCompanyEntriesOfOneDailyParam = entry :: l,
-//              groupedByYearM = groupedByYearM + (year -> (valuesInYear + entry))
+//              groupedByYearM = groupedByYearM + (year -> (mapValueTotalPerYear + entry))
 //            )
       }
     }
