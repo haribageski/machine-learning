@@ -1,11 +1,14 @@
 package utils.readers
 
-import dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinParameter}
-import dailyNewsParameter.{CompanyAllNews, News}
-import utils.DateExtended
+import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinParameter}
+import model.dailyNewsParameters.{CompanyAllNews, News}
+import model.DateExtended
+import model.yearlyFinancialParameters.{CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import utils.readers.ReadableColumnsDefaults.ColumnsReader
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
-import yearlyFinancialParameters.{CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
+import filters.DefaultFilters.CompanyDailyFinDataFilter
+import filters.FilterSyntax.FilterOps
+import filters.DefaultFilters.Validator._
 
 object ReadableDefaults {
 
@@ -15,8 +18,6 @@ object ReadableDefaults {
       * the dividends/quotes/SUEs and return new CompanyDailyFinData with all the read entries.
       */
     override def readDataFromFile(symbol: String): CompanyDailyFinData = {
-      import utils.filters.DefaultFilters.CompanyDailyFinDataFilter
-      import utils.filters.FilterSyntax.FilterOps
 
       val companyDailyFinParameter = CompanyDailyFinParameter(symbol)
       CompanyDailyFinData(
@@ -48,8 +49,6 @@ object ReadableDefaults {
     */
   implicit object CompanyYearlyFinDataReader extends Readable[CompanyYearlyFinData] {
     override def readDataFromFile(symbol: String): CompanyYearlyFinData = {
-      //      import utils.readers.ReadableDefaults.ColumnsReader
-      import utils.filters.DefaultFilters.Validator._
 
       //TODO: Get filePath in other way (from config)
       val filePath = "resources/yearly-fin-parameters/" + symbol + ".txt"

@@ -1,4 +1,4 @@
-package utils.filters
+package filters
 
 object FilterSyntax {
   implicit class FilterOps[A](value: A) {

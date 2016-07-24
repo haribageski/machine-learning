@@ -18,7 +18,8 @@ libraryDependencies ++= Seq(
 //  "onlinenewsmachinelearning" % "onlinenewsmachinelearning_2.11" % "1.0"  exclude("org.slf4j", "slf4j-jdk14"),
   "org.scalatest" %% "scalatest" % "2.2.6" % "test",
   "org.typelevel" %% "cats" % "0.4.0",
-  "com.github.pathikrit" %% "better-files" % betterFilesVersion
+  "com.github.pathikrit" %% "better-files" % betterFilesVersion,
+  "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0"
 ).map(_.exclude("ch.qos.logback", "logback-classic"))
 
 scalacOptions in ThisBuild ++= Seq(

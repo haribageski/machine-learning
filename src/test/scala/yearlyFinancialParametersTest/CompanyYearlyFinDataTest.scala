@@ -1,8 +1,8 @@
 package yearlyFinancialParametersTest
 
+import model.SymYear
 import org.scalatest.{FlatSpec, Matchers}
-import utils.SymYear
-import yearlyFinancialParameters._
+import model.yearlyFinancialParameters._
 
 import scala.collection.immutable.TreeMap
 import utils.ordered.OrderedSyntax._

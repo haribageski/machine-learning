@@ -1,7 +1,7 @@
 package utils.readers
 
-import dailyFinancialParameters.{CompanyDailyFinDataEntry, CompanyDailyFinParameter}
-import utils.DateExtended
+import model.DateExtended
+import model.dailyFinancialParameters.{CompanyDailyFinDataEntry, CompanyDailyFinParameter}
 import utils.readers.ReadableColumnsDefaults.ColumnsReader
 
 object ReadableParameterDefaults {

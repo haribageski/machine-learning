@@ -1,7 +1,7 @@
 package yearlyFinancialParametersTest
 
 import org.scalatest._
-import yearlyFinancialParameters.CompanyYearlyFinDataEntry
+import model.yearlyFinancialParameters.CompanyYearlyFinDataEntry
 import scala.collection.SortedSet
 
 class YearlyFinDataEntryTest extends FlatSpec with Matchers {

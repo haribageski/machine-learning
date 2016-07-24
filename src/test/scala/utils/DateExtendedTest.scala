@@ -1,8 +1,10 @@
 package utils
 
+import model.DateExtended
 import org.joda.time.IllegalFieldValueException
 import org.joda.time.format.DateTimeFormat
 import org.scalatest._
+
 import scala.collection.SortedSet
 import utils.ordered.OrderedSyntax._
 

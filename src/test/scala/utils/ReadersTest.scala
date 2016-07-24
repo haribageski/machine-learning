@@ -1,7 +1,8 @@
 package utils
 
-import dailyFinancialParameters.{CompanyDailyFinDataEntry, CompanyDailyFinParameter}
-import dailyNewsParameter.{CompanyAllNews, News}
+import model.DateExtended
+import model.dailyFinancialParameters.{CompanyDailyFinDataEntry, CompanyDailyFinParameter}
+import model.dailyNewsParameters.{CompanyAllNews, News}
 import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
 import utils.readers.ReadableColumnsDefaults.ColumnsReader
@@ -133,7 +134,7 @@ class ReadersTest  extends FlatSpec with Matchers {
 
   "CompanyNewsReader.readDataFromFile() " should "read all Company News in expected format" in {
     val sym = "Example"
-    val newsRead = CompanyNewsReader.readDataFromFile(sym)
+    val newsRead: CompanyAllNews = CompanyNewsReader.readDataFromFile(sym)
     newsRead.news(2) should be(
       News(sym, DateExtended("18/06/2013"), 2013, "Agilent Technologies Inc Announces Offering of Senior Notes",
         "Agilent Technologies Inc Announces Offering of Senior Notes Reuters Key Development - Jun 18, 2013")

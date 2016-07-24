@@ -1,11 +1,12 @@
 package utils
 
-import dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
+import model.DateExtended
+import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
+import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
-import yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
-import utils.filters.DefaultFilters._
-import utils.filters.FilterSyntax.FilterOps
+import filters.DefaultFilters._
+import filters.FilterSyntax.FilterOps
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
 
 import scala.collection.immutable.TreeSet

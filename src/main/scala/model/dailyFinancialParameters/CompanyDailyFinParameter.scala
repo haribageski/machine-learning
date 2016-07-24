@@ -1,4 +1,4 @@
-package dailyFinancialParameters
+package model.dailyFinancialParameters
 
 import utils.DateExtended
 import scala.annotation.tailrec

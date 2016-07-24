@@ -1,4 +1,4 @@
-package yearlyFinancialParameters
+package model.yearlyFinancialParameters
 
 import utils.SymYear
 

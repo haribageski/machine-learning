@@ -1,9 +1,10 @@
 package utils.cats_Show
 
 import cats.Show
-import dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinParameter}
-import utils.{DateExtended, SymDate, SymYear}
-import yearlyFinancialParameters.{CompanyYearlyFinData, CompanyYearlyFinParameter}
+import model.{DateExtended, SymDate}
+import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinParameter}
+import model.SymYear
+import model.yearlyFinancialParameters.{CompanyYearlyFinData, CompanyYearlyFinParameter}
 
 object ShowDefaults {
   implicit def symYearShow: Show[SymYear] = Show.show[SymYear] { symYear =>

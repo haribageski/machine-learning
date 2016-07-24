@@ -1,6 +1,8 @@
 package utils
 
+import model.{DateExtended, SymYear}
 import org.scalatest._
+
 import scala.collection.SortedSet
 import utils.ordered.OrderedSyntax._
 

@@ -1,0 +1,5 @@
+package analyzers
+
+class SentimentAnalyzer {
+
+}

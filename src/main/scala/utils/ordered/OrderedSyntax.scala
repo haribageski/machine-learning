@@ -1,8 +1,9 @@
 package utils.ordered
 
-import dailyFinancialParameters.CompanyDailyFinDataEntry
-import utils.{DateExtended, SymDate, SymYear}
-import yearlyFinancialParameters.CompanyYearlyFinDataEntry
+import model.{DateExtended, SymDate, SymYear}
+import model.dailyFinancialParameters.CompanyDailyFinDataEntry
+import model.SymYear
+import model.yearlyFinancialParameters.CompanyYearlyFinDataEntry
 
 /**
   * Set of interface-classes that wrap a class and make it Ordered.

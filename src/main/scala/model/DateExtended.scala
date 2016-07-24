@@ -1,7 +1,8 @@
-package utils
+package model
 
 import org.joda.time.DateTime
 import org.joda.time.format._
+
 import scala.language.implicitConversions
 
 /**

@@ -1,7 +1,8 @@
-package utils.filters
+package filters
 
-import dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
-import yearlyFinancialParameters.{CompanyYearlyFinData, CompanyYearlyExtendedFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
+import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
+import model.dailyNewsParameters.CompanyAllNews
+import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 
 import scala.annotation.tailrec
 
@@ -14,6 +15,7 @@ trait FilterData[A] {
 }
 
 object DefaultFilters {
+
   //TODO: Is this a good place for Validator? It is not really a filter.
   implicit object Validator {
     def validateValueInLines(indexes: Seq[Int])(line: List[String]): Boolean = {
@@ -57,7 +59,6 @@ object DefaultFilters {
     }
   }
 
-
   implicit object CompanyDailyFinDataFilter extends FilterData[CompanyDailyFinData] {
     override def applyFilter(companyDailyFinData: CompanyDailyFinData): CompanyDailyFinData = {
       val symbol = companyDailyFinData.symbol
@@ -85,7 +86,6 @@ object DefaultFilters {
     }
   }
 
-
   implicit object CompanyYearlyFinParameterFilter
     extends FilterParameter[CompanyYearlyFinParameter] {
 
@@ -93,7 +93,7 @@ object DefaultFilters {
       * Provided the consistent years, it creates new CompanyYearlyFinParameter from the current one, that is consistent
       * with the provided years. The parameters allCompanyEntries and companyYearlyFinParameter are only used inside its
       * implementation. Only consistentYears should be provided as an input parameter.
- *
+      *
       * @param consistentYears - hose are the years we are sure to be consistent
       * @return
       */
@@ -127,7 +127,6 @@ object DefaultFilters {
       )
     }
   }
-
 
   implicit object CompanyYearlyExtendedFinDataFilter
     extends FilterData[CompanyYearlyExtendedFinData] {
@@ -203,6 +202,18 @@ object DefaultFilters {
         companyBMratio,
         paramSize
       )
+    }
+  }
+
+  implicit object CompanyAllNewsFilter
+    extends FilterParameter[CompanyAllNews] {
+
+    /**
+      * Provided the consistent years, creates new CompanyAllNews from the current one consistent with the provided years.
+      */
+    override def applyFilter(companyNews: CompanyAllNews, consistentYears: Set[Int]): CompanyAllNews = {
+      val listOfConsistentNews = companyNews.news.filter(news => consistentYears.contains(news.yearOfNews))
+      companyNews.copy(news = listOfConsistentNews)
     }
   }
 }

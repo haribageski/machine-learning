@@ -1,7 +1,9 @@
 package utils
 
+import model.{DateExtended, SymDate}
 import org.joda.time.IllegalFieldValueException
 import org.scalatest._
+
 import scala.collection.SortedSet
 import utils.ordered.OrderedSyntax._
 

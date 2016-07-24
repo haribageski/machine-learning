@@ -1,4 +1,4 @@
-package dailyFinancialParameters
+package model.dailyFinancialParameters
 
 import org.scalatest._
 import utils.DateExtended

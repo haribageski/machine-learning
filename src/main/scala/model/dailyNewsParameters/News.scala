@@ -1,4 +1,4 @@
-package dailyNewsParameter
+package model.dailyNewsParameters
 
 import utils.DateExtended
 
