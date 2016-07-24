@@ -1,9 +1,12 @@
 package utils
 
 import dailyFinancialParameters.{CompanyDailyFinDataEntry, CompanyDailyFinParameter}
+import dailyNewsParameter.{CompanyAllNews, News}
 import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
-import utils.readers.ReadableDefaults.{CompanyDailyFinParameterReader, ColumnsReader}
+import utils.readers.ReadableColumnsDefaults.ColumnsReader
+import utils.readers.ReadableDefaults.CompanyNewsReader
+import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
 
 import scala.collection.immutable.TreeSet
 
@@ -12,27 +15,27 @@ class ReadersTest  extends FlatSpec with Matchers {
     val filePath = "resources/dividends/NOOF.txt"
     val filePath2 = "resources/dividends/wrongFormat.txt"
 
-    ColumnsReader.readColumnsFromFile(filePath) should be (
-    List(
-    List("NOOF", "19/03/2008", "0.125"), List("NOOF", "19/12/2007", "0.125"),
-    List("NOOF", "13/09/2007", "0.125"), List("NOOF", "31/05/2007", "0.125")
+    ColumnsReader.readColumnsFromFile(filePath) should be(
+      List(
+        List("NOOF", "19/03/2008", "0.125"), List("NOOF", "19/12/2007", "0.125"),
+        List("NOOF", "13/09/2007", "0.125"), List("NOOF", "31/05/2007", "0.125")
+      )
     )
-    )
-    ColumnsReader.readColumnsFromFile(filePath2) should be (
+    ColumnsReader.readColumnsFromFile(filePath2) should be(
       List(
         List("A", "27/03/2015", "0.1")
       )
     )
-//    ColumnsReader.readColumnsFromFile(filePath2 + "2") should be (
-//      List(
-//        List("A", "27/03/2015", "0.1")
-//      )
-//    )
-//    ColumnsReader.readColumnsFromFile(filePath2 + "3") should be (
-//      List(
-//        List("A", "27/03/2015", "0.1")
-//      )
-//    )
+    //    ColumnsReader.readColumnsFromFile(filePath2 + "2") should be (
+    //      List(
+    //        List("A", "27/03/2015", "0.1")
+    //      )
+    //    )
+    //    ColumnsReader.readColumnsFromFile(filePath2 + "3") should be (
+    //      List(
+    //        List("A", "27/03/2015", "0.1")
+    //      )
+    //    )
   }
 
   "readCompanyDividends() " should "read all CompanyDailyFinParameter dividends of the company from file" in {
@@ -72,24 +75,24 @@ class ReadersTest  extends FlatSpec with Matchers {
       Map.empty[Int, TreeSet[CompanyDailyFinDataEntry]])
 
     val sues = List(
-      CompanyDailyFinDataEntry("NOOF", 85.7099990844727,  DateExtended("10/06/2010")),
+      CompanyDailyFinDataEntry("NOOF", 85.7099990844727, DateExtended("10/06/2010")),
       CompanyDailyFinDataEntry("NOOF", -57.1399993896484, DateExtended("06/08/2010")),
       CompanyDailyFinDataEntry("NOOF", -133.330001831055, DateExtended("05/11/2010")),
-      CompanyDailyFinDataEntry("NOOF", -80,               DateExtended("04/02/2011"))
+      CompanyDailyFinDataEntry("NOOF", -80, DateExtended("04/02/2011"))
     )
 
-    val earliestS = CompanyDailyFinDataEntry("NOOF", -80,               DateExtended("04/02/2011"))
-    val oldestS = CompanyDailyFinDataEntry("NOOF", 85.7099990844727,  DateExtended("10/06/2010"))
+    val earliestS = CompanyDailyFinDataEntry("NOOF", -80, DateExtended("04/02/2011"))
+    val oldestS = CompanyDailyFinDataEntry("NOOF", 85.7099990844727, DateExtended("10/06/2010"))
 
     val suesRead = CompanyDailyFinParameterReader.readEarningSurpriseFromFile("NOOF")
-    val toComp =  CompanyDailyFinParameter(sym, Some(oldestS), Some(earliestS), sues,
+    val toComp = CompanyDailyFinParameter(sym, Some(oldestS), Some(earliestS), sues,
       Map(2010 -> TreeSet(
-        CompanyDailyFinDataEntry("NOOF", 85.7099990844727,  DateExtended("10/06/2010")),
+        CompanyDailyFinDataEntry("NOOF", 85.7099990844727, DateExtended("10/06/2010")),
         CompanyDailyFinDataEntry("NOOF", -57.1399993896484, DateExtended("06/08/2010")),
         CompanyDailyFinDataEntry("NOOF", -133.330001831055, DateExtended("05/11/2010"))
       ),
         2011 -> TreeSet(
-          CompanyDailyFinDataEntry("NOOF", -80,  DateExtended("04/02/2011"))
+          CompanyDailyFinDataEntry("NOOF", -80, DateExtended("04/02/2011"))
         ))
     )
     suesRead == toComp should be(true)
@@ -111,11 +114,11 @@ class ReadersTest  extends FlatSpec with Matchers {
     )
 
     val oldestQ = CompanyDailyFinDataEntry("test", 2.01, DateExtended("22/11/2012"))
-    val earliestQ= CompanyDailyFinDataEntry("test", 2.02, DateExtended("28/11/2012"))
+    val earliestQ = CompanyDailyFinDataEntry("test", 2.02, DateExtended("28/11/2012"))
 
     val quotesRead: CompanyDailyFinParameter = CompanyDailyFinParameterReader.readQuotesFromFile("test")
 
-    val toComp =  CompanyDailyFinParameter(sym, Some(oldestQ), Some(earliestQ), quotes,
+    val toComp = CompanyDailyFinParameter(sym, Some(oldestQ), Some(earliestQ), quotes,
       Map(2012 -> TreeSet(
         CompanyDailyFinDataEntry("test", 2.01, DateExtended("22/11/2012")),
         CompanyDailyFinDataEntry("test", 1.99, DateExtended("23/11/2012")),
@@ -124,7 +127,25 @@ class ReadersTest  extends FlatSpec with Matchers {
         CompanyDailyFinDataEntry("test", 2.02, DateExtended("28/11/2012"))
       ))
     )
-
     quotesRead == toComp should be(true)
+  }
+
+
+  "CompanyNewsReader.readDataFromFile() " should "read all Company News in expected format" in {
+    val sym = "Example"
+    val newsRead = CompanyNewsReader.readDataFromFile(sym)
+    newsRead.news(2) should be(
+      News(sym, DateExtended("18/06/2013"), 2013, "Agilent Technologies Inc Announces Offering of Senior Notes",
+        "Agilent Technologies Inc Announces Offering of Senior Notes Reuters Key Development - Jun 18, 2013")
+    )
+
+    newsRead.news(0) should be(
+      News(sym, DateExtended("02/03/2014"), 2014, "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8%",
+        "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8% Wall Street Pulse - Mar 2, 2015 Agilent Technologies, Inc. (NYSE:A) reported a rise of 132,877 shares or 5.8% in the short interest. The remaining shorts are 0.7% of the total floated shares.Share Price of Agilent Technologies, Inc. Rally 0.62% - Ashburn DailyAgilent Technologies Receives &quot;A-&quot; Credit Rating from Morningstar (A) - sleekmoney")
+    )
+    newsRead.news(1) should be(
+      News(sym, DateExtended("18/06/2013"), 2013, "Agilent Technologies Inc Prices $600 Million of Senior Notes",
+        "Agilent Technologies Inc Prices $600 Million of Senior Notes Reuters Key Development - Jun 18, 2013")
+    )
   }
 }

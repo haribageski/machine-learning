@@ -6,13 +6,13 @@ import utils.ordered.OrderedSyntax._
 import yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import utils.filters.DefaultFilters._
 import utils.filters.FilterSyntax.FilterOps
+import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
 
 import scala.collection.immutable.TreeSet
 
 class FiltersTest extends FlatSpec with Matchers {
   "filter()" should
   "return parameter that contains only consistent in year entries" in {
-    import utils.readers.ReadableDefaults.CompanyDailyFinParameterReader
 
     val sym = "EZPW"
     val dividends = List(
