@@ -1,6 +1,6 @@
 package model.yearlyFinancialParameters
 
-import utils.SymYear
+import model.SymYear
 
 /**
   *

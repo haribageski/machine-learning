@@ -1,6 +1,6 @@
 package model.dailyFinancialParameters
 
-import utils.DateExtended
+import model.DateExtended
 
 case class CompanyDailyFinDataEntry(symbol: String, value: Double, date: DateExtended)  {
   def setDate(d: DateExtended): CompanyDailyFinDataEntry = {

@@ -1,8 +1,9 @@
 package model.dailyFinancialParameters
 
-import org.scalatest.{Matchers, FlatSpec}
-import utils.DateExtended
+import model.DateExtended
+import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
+
 import scala.collection.immutable.TreeSet
 
 class CompanyDailyFinParameterTest extends FlatSpec with Matchers {

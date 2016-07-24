@@ -1,7 +1,7 @@
 package model.dailyFinancialParameters
 
+import model.DateExtended
 import org.scalatest._
-import utils.DateExtended
 import utils.ordered.OrderedSyntax._
 
 

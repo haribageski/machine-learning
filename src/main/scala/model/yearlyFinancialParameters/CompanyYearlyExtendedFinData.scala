@@ -1,7 +1,8 @@
 package model.yearlyFinancialParameters
 
+import model.SymYear
 import model.dailyFinancialParameters._
-import utils.SymYear
+
 import scala.annotation.tailrec
 import scala.collection.immutable.TreeSet
 

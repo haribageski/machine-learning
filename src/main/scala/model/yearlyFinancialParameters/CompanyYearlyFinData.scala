@@ -1,6 +1,6 @@
 package model.yearlyFinancialParameters
 
-import utils.DateExtended
+import model.DateExtended
 
 case class CompanyYearlyFinData (
                              symbol: String,

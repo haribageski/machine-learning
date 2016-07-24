@@ -1,6 +1,6 @@
 package model.yearlyFinancialParameters
 
-import utils.SymYear
+import model.SymYear
 
 import scala.annotation.tailrec
 import scala.collection.immutable.TreeMap
