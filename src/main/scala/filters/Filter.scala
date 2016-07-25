@@ -1,7 +1,7 @@
 package filters
 
 import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
-import model.dailyNewsParameters.CompanyAllNews
+import model.dailyNewsParameters.{CompanyAllNews, News}
 import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 
 import scala.annotation.tailrec
@@ -205,6 +205,7 @@ object DefaultFilters {
     }
   }
 
+
   implicit object CompanyAllNewsFilter
     extends FilterParameter[CompanyAllNews] {
 
@@ -212,7 +213,7 @@ object DefaultFilters {
       * Provided the consistent years, creates new CompanyAllNews from the current one consistent with the provided years.
       */
     override def applyFilter(companyNews: CompanyAllNews, consistentYears: Set[Int]): CompanyAllNews = {
-      val listOfConsistentNews = companyNews.news.filter(news => consistentYears.contains(news.yearOfNews))
+      val listOfConsistentNews: List[News] = companyNews.news.filter(news => consistentYears.contains(news.yearOfNews))
       companyNews.copy(news = listOfConsistentNews)
     }
   }

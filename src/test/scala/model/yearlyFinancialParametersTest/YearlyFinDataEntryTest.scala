@@ -1,4 +1,4 @@
-package yearlyFinancialParametersTest
+package model.yearlyFinancialParametersTest
 
 import org.scalatest._
 import model.yearlyFinancialParameters.CompanyYearlyFinDataEntry

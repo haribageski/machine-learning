@@ -7,13 +7,13 @@ import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
 import filters.DefaultFilters._
 import filters.FilterSyntax.FilterOps
+import model.dailyNewsParameters.{CompanyAllNews, News}
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
 
 import scala.collection.immutable.TreeSet
 
 class FiltersTest extends FlatSpec with Matchers {
-  "filter()" should
-  "return parameter that contains only consistent in year entries" in {
+  "filter()" should "return parameter that contains only consistent in year entries" in {
 
     val sym = "EZPW"
     val dividends = List(
@@ -72,5 +72,26 @@ class FiltersTest extends FlatSpec with Matchers {
     val companyDailyFinData = CompanyDailyFinData("A")
     val company = CompanyYearlyExtendedFinData(companyYearlyFinData, companyDailyFinData, None, None, None)
     company.filter should be (company.copy(CompanyYearlyFinData("A"), CompanyDailyFinData("A")))
+  }
+
+
+  "CompanyAllNewsFilter.filter(consistentYears: Set[Int])" should
+    "return CompanyAllNewsFilter that contains only consistent in year entries" in {
+    val news1 = News("A", DateExtended("10/03/2015"), 2015,
+      "Agilent Technologies Receives $47.28 Consensus Price Target from Brokerages ...",
+      "Agilent Technologies Receives $47.28 Consensus Price Target from Brokerages ... WKRB News - Mar 10, 2015 Agilent Technologies logo Shares of Agilent Technologies (NYSE:A) have received an average rating of ?Hold? from the fourteen analysts that are covering the company, American Banking News reports. Nine research analysts have rated the stock with a hold&nbsp;..."
+    )
+    val news2 = News("A", DateExtended("10/03/2014"), 2014,
+      "First Call Rating Update on Agilent Technologies, Inc.",
+      "First Call Rating Update on Agilent Technologies, Inc. Ashburn Daily - Mar 11, 2015 Agilent Technologies, Inc. (NYSE:A) was down 2.66% or 1.11 points for the day. The opening trade was executed at $41.22 and the final trade was executed at $40.63.UBS Rating Disclosure on Agilent Technologies, Inc. - Markets BureauStocks to Watch: Agilent Technologies Inc , Service Corporation International ... - Rock Hill Daily"
+    )
+    val companyAllNews = CompanyAllNews(
+      "A",
+      List(news1, news2)
+    )
+    companyAllNews.filter(Set(2014)).news should be (List(news2))
+    companyAllNews.filter(Set(2015)).news should be (List(news1))
+    companyAllNews.filter(Set.empty[Int]) should be (CompanyAllNews("A", Nil))
+    companyAllNews.filter(Set(2014, 2015)) should be (companyAllNews)
   }
 }

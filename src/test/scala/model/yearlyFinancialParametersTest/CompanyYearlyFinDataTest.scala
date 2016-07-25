@@ -1,4 +1,4 @@
-package yearlyFinancialParametersTest
+package model.yearlyFinancialParametersTest
 
 import model.SymYear
 import org.scalatest.{FlatSpec, Matchers}

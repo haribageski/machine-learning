@@ -1,4 +1,4 @@
-package yearlyFinancialParametersTest
+package model.yearlyFinancialParametersTest
 
 import filters.{DefaultFilters, FilterSyntax}
 import model.{DateExtended, SymYear}
