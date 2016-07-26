@@ -1,8 +1,11 @@
 package filters
 
+import model.{CombinedCompanyParameters, DateExtended}
 import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
 import model.dailyNewsParameters.{CompanyAllNews, News}
 import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
+import FilterSyntax._
+import model.sentiment.{CompanyNewsSentiment, Sentiment}
 
 import scala.annotation.tailrec
 
@@ -206,15 +209,46 @@ object DefaultFilters {
   }
 
 
-  implicit object CompanyAllNewsFilter
-    extends FilterParameter[CompanyAllNews] {
+  implicit object CompanyYearlyExtendedFinDataFilterFromConsistentYears extends FilterParameter[CompanyYearlyExtendedFinData] {
+    override def applyFilter(finData: CompanyYearlyExtendedFinData, consistentYears: Set[Int]): CompanyYearlyExtendedFinData =
+      CompanyYearlyExtendedFinData(
+        finData.companyYearlyFinData.filter(consistentYears),
+        finData.companyDailyFinData.filter(consistentYears),
+        finData.companyMarketValues.filter(consistentYears),
+        finData.companyBMratio.filter(consistentYears),
+        finData.companySize.filter(consistentYears)
+      )
+  }
+
+
+  implicit object CompanyNewsSentimentFilter extends FilterParameter[CompanyNewsSentiment] {
 
     /**
       * Provided the consistent years, creates new CompanyAllNews from the current one consistent with the provided years.
       */
-    override def applyFilter(companyNews: CompanyAllNews, consistentYears: Set[Int]): CompanyAllNews = {
-      val listOfConsistentNews: List[News] = companyNews.news.filter(news => consistentYears.contains(news.yearOfNews))
-      companyNews.copy(news = listOfConsistentNews)
+    override def applyFilter(companySentiments: CompanyNewsSentiment, consistentYears: Set[Int]): CompanyNewsSentiment = {
+      val consistentAvgTitleM: Map[DateExtended, Sentiment] =
+        companySentiments.avgSentiPerDateTitle.filterKeys(dateE => consistentYears.contains(dateE.dateExtended.getYear))
+      val consistentAvgDescriptM: Map[DateExtended, Sentiment] =
+        companySentiments.avgSentiPerDateDescript.filterKeys(dateE => consistentYears.contains(dateE.dateExtended.getYear))
+
+      CompanyNewsSentiment(companySentiments.sym, consistentAvgTitleM, consistentAvgDescriptM)
+    }
+  }
+
+
+  implicit object CombinedCompanyParametersFilter extends FilterData[CombinedCompanyParameters] {
+    override def applyFilter(allParameters: CombinedCompanyParameters): CombinedCompanyParameters = {
+      val consistentFinancialData: CompanyYearlyExtendedFinData = allParameters.yearlyExtendedFinData.filter
+      val concistentCombinedCompanyParametersYears: Set[Int] =
+        allParameters.newsSentiment.avgSentiPerDateDescript.keySet.map(_.dateExtended.getYear)
+        .intersect(consistentFinancialData.companyYearlyFinData.accrual.perYearM.keySet.map(_.year))
+
+      CombinedCompanyParameters(
+        allParameters.symbol,
+        allParameters.yearlyExtendedFinData.filter(concistentCombinedCompanyParametersYears),
+        allParameters.newsSentiment.filter(concistentCombinedCompanyParametersYears)
+      )
     }
   }
 }

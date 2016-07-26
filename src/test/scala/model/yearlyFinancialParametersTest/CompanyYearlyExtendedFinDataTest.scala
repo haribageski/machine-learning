@@ -9,7 +9,8 @@ import DefaultFilters.CompanyYearlyExtendedFinDataFilter
 import utils.readers.ReadableDefaults.CompanyDailyFinDataReader
 import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader.readDataFromFile
 import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
-
+import DefaultFilters.CompanyYearlyExtendedFinDataFilter
+import FilterSyntax.FilterOps
 import scala.collection.immutable.{TreeMap, TreeSet}
 import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader._
 
@@ -54,8 +55,6 @@ class CompanyYearlyExtendedFinDataTest  extends FlatSpec with Matchers {
 
 
   "filterInconsistentEntries()" should "filter out inconsistent entries" in {
-    import DefaultFilters.CompanyYearlyExtendedFinDataFilter
-    import FilterSyntax.FilterOps
     val filtered: CompanyYearlyExtendedFinData = companyYearlyExtendedWithDerivedParams.filter
 
     val divi1 = CompanyDailyFinDataEntry(sym, 0.01, DateExtended("30/03/2014"))
