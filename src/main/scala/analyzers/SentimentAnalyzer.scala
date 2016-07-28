@@ -35,7 +35,6 @@ object SentimentAnalyzer {
     * Sentiment represents to the number of pos,neg,neut sentences.
     */
   def evaluateSentiOfText(text: String): Sentiment = {
-    println("evaluateSentiOfText() - " + text)
     val annotation: Annotation = new Annotation(text) //Annotation is a Map
     pipeline.annotate(annotation)
 
@@ -43,10 +42,10 @@ object SentimentAnalyzer {
     // For instance, get the parse tree of the first sentence in the text.
     val sentences: List[CoreMap] = annotation.get(classOf[CoreAnnotations.SentencesAnnotation]).asScala.toList
 
-    if (sentences != null && !sentences.isEmpty) {
+    if (sentences != null && sentences.nonEmpty) {
       sentences.foldLeft(SentimentMonoid.empty)((acc, sentence) => {
         val sentiment: String = sentence.get(classOf[SentimentCoreAnnotations.SentimentClass])
-        println("Sentiment for :" + sentence.toString() + "is: " + sentiment)
+//        println("Sentiment for :" + sentence.toString() + "is: " + sentiment)
         sentiment match {
           case "Positive" => acc.copy(pos = acc.pos + 1)
           case "Negative" => acc.copy(neg = acc.neg + 1)

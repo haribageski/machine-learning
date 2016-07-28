@@ -2,7 +2,7 @@ package model.dailyFinancialParameters
 
 import model.DateExtended
 
-case class CompanyDailyFinDataEntry(symbol: String, value: Double, date: DateExtended)  {
+case class CompanyDailyFinDataEntry(symbol: String, value: Double, date: DateExtended) {
   def setDate(d: DateExtended): CompanyDailyFinDataEntry = {
     copy(date = d)
   }
@@ -13,7 +13,7 @@ case class CompanyDailyFinDataEntry(symbol: String, value: Double, date: DateExt
 
   override def equals(other: Any) = other match {
     case that: CompanyDailyFinDataEntry =>
-      that.symbol == symbol && that.value == value
+      that.symbol == symbol && that.date == date
     case _ => false
   }
 }

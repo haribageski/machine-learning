@@ -209,15 +209,52 @@ object DefaultFilters {
   }
 
 
-  implicit object CompanyYearlyExtendedFinDataFilterFromConsistentYears extends FilterParameter[CompanyYearlyExtendedFinData] {
+  implicit object CompanyYearlyFinDataFilterFromConsistentYears extends FilterParameter[CompanyYearlyFinData] {
+    override def applyFilter(finData: CompanyYearlyFinData, consistentYears: Set[Int]): CompanyYearlyFinData = {
+      CompanyYearlyFinData(
+        finData.symbol,
+        finData.bookValue.filter(consistentYears),
+        finData.shares.filter(consistentYears),
+        finData.rOE.filter(consistentYears),
+        finData.accrual.filter(consistentYears)
+      )
+    }
+  }
+
+
+  implicit object CompanyDailyFinDataFilterFromConsistentYears extends FilterParameter[CompanyDailyFinData] {
+    override def applyFilter(finData: CompanyDailyFinData, consistentYears: Set[Int]): CompanyDailyFinData = {
+      CompanyDailyFinData(
+        finData.symbol,
+        finData.parameterDividends.filter(consistentYears),
+        finData.parameterQuotes.filter(consistentYears),
+        finData.parameterSUEs.filter(consistentYears)
+      )
+    }
+  }
+
+
+
+    implicit object CompanyYearlyExtendedFinDataFilterFromConsistentYears extends FilterParameter[CompanyYearlyExtendedFinData] {
     override def applyFilter(finData: CompanyYearlyExtendedFinData, consistentYears: Set[Int]): CompanyYearlyExtendedFinData =
       CompanyYearlyExtendedFinData(
         finData.companyYearlyFinData.filter(consistentYears),
         finData.companyDailyFinData.filter(consistentYears),
-        finData.companyMarketValues.filter(consistentYears),
-        finData.companyBMratio.filter(consistentYears),
-        finData.companySize.filter(consistentYears)
+        finData.companyMarketValues.map(_.filter(consistentYears)),
+        finData.companyBMratio.map(_.filter(consistentYears)),
+        finData.companySize.map(_.filter(consistentYears))
       )
+  }
+
+  implicit object CompanyAllNewsFilter extends FilterParameter[CompanyAllNews] {
+
+    /**
+      * Provided the consistent years, creates new CompanyAllNews from the current one consistent with the provided years.
+      */
+    override def applyFilter(allNews: CompanyAllNews, consistentYears: Set[Int]): CompanyAllNews = {
+      val filteredNews = allNews.news.filter(news => consistentYears.contains(news.dateOfNews.dateExtended.getYear))
+      CompanyAllNews(allNews.symbol, filteredNews)
+    }
   }
 
 

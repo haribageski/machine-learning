@@ -3,7 +3,6 @@ package model.dailyFinancialParameters
 import model.DateExtended
 import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
-
 import scala.collection.immutable.TreeSet
 
 class CompanyDailyFinParameterTest extends FlatSpec with Matchers {
@@ -28,8 +27,8 @@ class CompanyDailyFinParameterTest extends FlatSpec with Matchers {
 
     val dividend3 = CompanyDailyFinDataEntry("A", 1000, DateExtended("01/02/2015"))
     val companyDividend4 =
-      CompanyDailyFinParameter("A", Some(dividend1), Some(dividend2), List(dividend2, dividend3, dividend1),
-        Map(2015 -> TreeSet(dividend3, dividend2, dividend1))
+      CompanyDailyFinParameter("A", Some(dividend1), Some(dividend2), List(dividend3, dividend2, dividend1),
+        Map(2015 -> TreeSet(dividend2, dividend3, dividend1))
       )
     companyDividend3.addEntry(dividend3) == companyDividend4 should be(true)
 

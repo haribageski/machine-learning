@@ -16,6 +16,11 @@ case class CompanyYearlyFinDataEntry(symbol: String, value: Double, year: Int)  
     CompanyYearlyFinDataEntry(symbol, v, year)
   }
 
-
   val symYear = SymYear(symbol, year)
+
+  override def equals(other: Any) = other match {
+    case that: CompanyYearlyFinDataEntry =>
+      that.symbol == symbol && that.year == year
+    case _ => false
+  }
 }

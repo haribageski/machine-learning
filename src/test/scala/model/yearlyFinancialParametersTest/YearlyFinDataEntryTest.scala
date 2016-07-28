@@ -2,7 +2,9 @@ package model.yearlyFinancialParametersTest
 
 import org.scalatest._
 import model.yearlyFinancialParameters.CompanyYearlyFinDataEntry
+
 import scala.collection.SortedSet
+import scala.collection.immutable.TreeSet
 
 class YearlyFinDataEntryTest extends FlatSpec with Matchers {
   "Instance of YearlyFinData " should "be correctly constructed" in {
@@ -36,10 +38,10 @@ class YearlyFinDataEntryTest extends FlatSpec with Matchers {
 
     yearlyFinData1 == yearlyFinData2 should be(true)
     yearlyFinData1 == yearlyFinData3  should be(false)
-    yearlyFinData1 == yearlyFinData4  should be(false)
+    yearlyFinData1 == yearlyFinData4  should be(true)
     yearlyFinData1 == yearlyFinData5  should be(false)
-    yearlyFinData1 < yearlyFinData3  should be(false)
-    yearlyFinData1 < yearlyFinData4  should be(true)
+    TreeSet(yearlyFinData1, yearlyFinData3, yearlyFinData4) should be
+      (TreeSet(yearlyFinData3, yearlyFinData4, yearlyFinData1))
   }
 
 }

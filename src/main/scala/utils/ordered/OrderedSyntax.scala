@@ -2,7 +2,6 @@ package utils.ordered
 
 import model.{DateExtended, SymDate, SymYear}
 import model.dailyFinancialParameters.CompanyDailyFinDataEntry
-import model.SymYear
 import model.yearlyFinancialParameters.CompanyYearlyFinDataEntry
 
 /**
@@ -33,14 +32,16 @@ object OrderedSyntax {
   implicit class OrderedCompanyDailyFinDataEntry(companyDailyFinDataEntry: CompanyDailyFinDataEntry)
     extends Ordered[CompanyDailyFinDataEntry] {
     def compare(that: CompanyDailyFinDataEntry) = {
-      companyDailyFinDataEntry.value.compareTo(that.value)
+      if(companyDailyFinDataEntry.symbol != that.symbol)
+        companyDailyFinDataEntry.symbol.compareTo(that.symbol)
+      else
+        companyDailyFinDataEntry.date.compareTo(that.date)
     }
   }
 
   implicit class OrderedCompanyYearlyFinDataEntry(companyYearlyFinDataEntry: CompanyYearlyFinDataEntry)
     extends Ordered[CompanyYearlyFinDataEntry] {
-    def compare(that: CompanyYearlyFinDataEntry) = {
-      companyYearlyFinDataEntry.value.compareTo(that.value)
-    }
+    def compare(that: CompanyYearlyFinDataEntry) =
+      companyYearlyFinDataEntry.symYear.compareTo(that.symYear)
   }
 }

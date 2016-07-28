@@ -16,7 +16,7 @@ class SentimentAnalyzerTest  extends FlatSpec with Matchers {
       "Agilent Technologies Inc Prices $600 Million of Senior Notes",
       "Agilent Technologies Inc Prices $600 Million of Senior Notes Reuters Key Development - Jun 18, 2013"
     )
-    val news3 = News(symbol, DateExtended("02/03/2014"), 2013,
+    val news3 = News(symbol, DateExtended("02/03/2014"), 2014,
       "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8%",
       "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8% Wall Street Pulse - Mar 2, 2015 Agilent Technologies, Inc. (NYSE:A) reported a rise of 132,877 shares or 5.8% in the short interest. The remaining shorts are 0.7% of the total floated shares.Share Price of Agilent Technologies, Inc. Rally 0.62% - Ashburn DailyAgilent Technologies Receives &quot;A-&quot; Credit Rating from Morningstar (A) - sleekmoney"
     )

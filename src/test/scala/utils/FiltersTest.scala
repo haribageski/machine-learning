@@ -1,6 +1,7 @@
 package utils
 
-import model.DateExtended
+import analyzers.SentimentAnalyzer
+import model.{CombinedCompanyParameters, DateExtended}
 import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
 import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import org.scalatest.{FlatSpec, Matchers}
@@ -8,6 +9,7 @@ import utils.ordered.OrderedSyntax._
 import filters.DefaultFilters._
 import filters.FilterSyntax.FilterOps
 import model.dailyNewsParameters.{CompanyAllNews, News}
+import model.sentiment.CompanyNewsSentiment
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
 
 import scala.collection.immutable.TreeSet
@@ -93,5 +95,70 @@ class FiltersTest extends FlatSpec with Matchers {
     companyAllNews.filter(Set(2015)).news should be (List(news1))
     companyAllNews.filter(Set.empty[Int]) should be (CompanyAllNews("A", Nil))
     companyAllNews.filter(Set(2014, 2015)) should be (companyAllNews)
+  }
+
+  "CombinedCompanyParametersFilter.filter()" should
+    "return CombinedCompanyParametersFilter that contains only consistent in year entries" in {
+    val symbol = "Example"
+    val companyYearlyFinParameter2 = CompanyYearlyFinParameter("A")
+      .addEntry(CompanyYearlyFinDataEntry(symbol, 124.2, 2015))
+      .addEntry(CompanyYearlyFinDataEntry(symbol, 124.2, 2014))
+      .addEntry(CompanyYearlyFinDataEntry(symbol, 124.2, 2013))
+      .addEntry(CompanyYearlyFinDataEntry(symbol, 124.2, 2012))
+    val companyYearlyFinData =
+      CompanyYearlyFinData(symbol, companyYearlyFinParameter2, companyYearlyFinParameter2, CompanyYearlyFinParameter("A"), companyYearlyFinParameter2)
+
+    val dividends = List(
+      CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("07/08/2012")),
+      CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("07/08/2013")),
+      CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("20/11/2015")),
+      CompanyDailyFinDataEntry(symbol, 0.00432999990880489, DateExtended("04/02/2015"))
+    )
+    val earliestD = CompanyDailyFinDataEntry(symbol, 0.00432999990880489, DateExtended("04/02/2015"))
+    val oldestD = CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("07/08/2012"))
+    val companyDailyFinParam = CompanyDailyFinParameter(
+      symbol, Some(oldestD), Some(earliestD), dividends,
+      Map(
+        2012 -> TreeSet(
+          CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("07/08/2012"))
+        ),
+        2013 -> TreeSet(
+          CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("07/08/2013"))
+        ),
+        2015 -> TreeSet(
+          CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("20/11/2015")),
+          CompanyDailyFinDataEntry(symbol, 0.00432999990880489, DateExtended("04/02/2015"))
+        )
+      )
+    )
+    val companyDailyFinData = CompanyDailyFinData(symbol,companyDailyFinParam, companyDailyFinParam, companyDailyFinParam)
+
+    val yearlyExtendedFinData = CompanyYearlyExtendedFinData(companyYearlyFinData, companyDailyFinData)
+      .deriveAdditionalFinParameters()
+
+    val sentimentInOneGo: CompanyNewsSentiment = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(symbol)
+
+
+    val combinedCompanyParameters = CombinedCompanyParameters(symbol, yearlyExtendedFinData, sentimentInOneGo)
+    val combinedCompanyParametersFiltered = combinedCompanyParameters.filter
+
+    combinedCompanyParametersFiltered.newsSentiment should be
+      sentimentInOneGo.filter(yearlyExtendedFinData.filter.companyYearlyFinData.accrual.perYearM.keySet.map(_.year))
+
+    combinedCompanyParametersFiltered.yearlyExtendedFinData should be
+      yearlyExtendedFinData.filter(sentimentInOneGo.avgSentiPerDateDescript.keySet.map(_.dateExtended.getYear))
+  }
+
+
+
+  "CompanyNewsSentimentFilter" should
+    "return CompanyNewsSentimentFilter consistent with the given years" in {
+    val sentimentInOneGo: CompanyNewsSentiment = SentimentAnalyzer.evaluateSentiOfAllCompanyNews("Example")
+    val filteredSentiment = sentimentInOneGo.filter(Set(2014))
+
+    filteredSentiment.avgSentiPerDateDescript should be
+      sentimentInOneGo.avgSentiPerDateDescript.filterKeys(_.dateExtended.getYear == 2014)
+    filteredSentiment.avgSentiPerDateTitle should be
+      sentimentInOneGo.avgSentiPerDateTitle.filterKeys(_.dateExtended.getYear == 2014)
   }
 }

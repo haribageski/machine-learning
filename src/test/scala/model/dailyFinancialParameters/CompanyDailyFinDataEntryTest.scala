@@ -4,6 +4,7 @@ import model.DateExtended
 import org.scalatest._
 import utils.ordered.OrderedSyntax._
 
+import scala.collection.immutable.TreeSet
 
 /**
   * Created by hari on 16/03/16.
@@ -35,10 +36,9 @@ class CompanyDailyFinDataEntryTest extends FlatSpec with Matchers {
 
     dailyFinData1 == dailyFinData2 should be(true)
     dailyFinData1 == dailyFinData3 should be(false)
-    dailyFinData1 == dailyFinData4 should be(false)
-    dailyFinData1 == dailyFinData5 should be(true)
+    dailyFinData1 == dailyFinData4 should be(true)
+    dailyFinData1 == dailyFinData5 should be(false)
     dailyFinData1 == "01/01/2015" should be(false)
-    dailyFinData1 < dailyFinData3 should be(false)
-    dailyFinData1 < dailyFinData4 should be(true)
+    TreeSet(dailyFinData1, dailyFinData3, dailyFinData5) should be (TreeSet(dailyFinData3, dailyFinData5, dailyFinData1))
   }
 }

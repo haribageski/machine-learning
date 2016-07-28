@@ -6,8 +6,8 @@ import model.dailyNewsParameters.{CompanyAllNews, News}
 import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
 import utils.readers.ReadableColumnsDefaults.ColumnsReader
-import utils.readers.ReadableDefaults.CompanyNewsReader
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
+import utils.readers.ReadableDefaults._
 
 import scala.collection.immutable.TreeSet
 
@@ -17,15 +17,15 @@ class ReadersTest  extends FlatSpec with Matchers {
     val filePath2 = "resources/dividends/wrongFormat.txt"
 
     ColumnsReader.readColumnsFromFile(filePath) should be(
-      List(
-        List("NOOF", "19/03/2008", "0.125"), List("NOOF", "19/12/2007", "0.125"),
-        List("NOOF", "13/09/2007", "0.125"), List("NOOF", "31/05/2007", "0.125")
-      )
+    List(
+    List("NOOF", "19/03/2008", "0.125"), List("NOOF", "19/12/2007", "0.125"),
+    List("NOOF", "13/09/2007", "0.125"), List("NOOF", "31/05/2007", "0.125")
+    )
     )
     ColumnsReader.readColumnsFromFile(filePath2) should be(
-      List(
-        List("A", "27/03/2015", "0.1")
-      )
+    List(
+    List("A", "27/03/2015", "0.1")
+    )
     )
     //    ColumnsReader.readColumnsFromFile(filePath2 + "2") should be (
     //      List(
@@ -40,7 +40,6 @@ class ReadersTest  extends FlatSpec with Matchers {
   }
 
   "readCompanyDividends() " should "read all CompanyDailyFinParameter dividends of the company from file" in {
-    import utils.readers.ReadableDefaults._
     val sym = "NOOF"
     val companyDividends = CompanyDailyFinParameter(sym)
 

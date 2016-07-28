@@ -66,10 +66,8 @@ case class CompanyYearlyFinParameter(symbol: String,
   }
 
 
-  @tailrec
-  final def addEntries(entriesL: List[CompanyYearlyFinDataEntry]): CompanyYearlyFinParameter = entriesL match {
-    case Nil => this
-    case h :: t => this.addEntry(h).addEntries(t)
+  def addEntries(entriesL: List[CompanyYearlyFinDataEntry]): CompanyYearlyFinParameter = {
+    entriesL.foldLeft(this)((acc, entry) => acc.addEntry(entry))
   }
 
 

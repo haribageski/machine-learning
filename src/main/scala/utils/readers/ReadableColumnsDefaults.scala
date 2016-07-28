@@ -23,21 +23,16 @@ object ReadableColumnsDefaults {
       * @param lines   : List[String]
       * @param columns : ListBuffer[List[String]
       */
-    @tailrec
     private def findColumnsFromInputLines(lines: Traversable[String], columns: ListBuffer[List[String]]): List[List[String]] =
-      lines.isEmpty match {
-        case true => columns.reverse.toList
-        case false =>
-          val currentLine = lines.head
-          val tailLines = lines.tail
-          val columnsInCurrentLine: Array[String] = currentLine.split("\\t")
-          val validLine: Boolean = columnsInCurrentLine.forall { p =>
-            p != "NaN" && !p.isEmpty && p != "\"\"" && p != "null"
-          }
-          validLine match {
-            case false => findColumnsFromInputLines(tailLines, columns)
-            case true => findColumnsFromInputLines(tailLines, columns += columnsInCurrentLine.toList)
-          }
-      }
+      lines.foldLeft(columns)((acc, str) => {
+        val columnsInCurrentLine: Array[String] = str.split("\\t")
+        val validLine: Boolean = columnsInCurrentLine.forall { p =>
+          p != "NaN" && !p.isEmpty && p != "\"\"" && p != "null"
+        }
+        validLine match {
+          case false => acc
+          case true => acc += columnsInCurrentLine.toList
+        }
+      }).reverse.toList
   }
 }

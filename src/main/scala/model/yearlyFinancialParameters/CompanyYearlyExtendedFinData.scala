@@ -72,20 +72,19 @@ case class CompanyYearlyExtendedFinData(companyYearlyFinData: CompanyYearlyFinDa
     * Finds nonzero MarketValue using average per year quotes and yearly share for all years from the input parameter.
     * If for some year is not possible, then the returning list will not contain any MarketValue for that year.
     */
-  @tailrec
   private def findMarketValuesToAdd(marketVals: List[CompanyYearlyFinDataEntry] = Nil, symYears: Set[SymYear]):
   List[CompanyYearlyFinDataEntry] = {
-    if(symYears.isEmpty)    marketVals
-    else {
-        val head = symYears.head
-        val sym = head.sym
-        val year = head.year
+
+    val setOpt: Set[Option[CompanyYearlyFinDataEntry]] = symYears.map {
+      symYear =>
+        val sym = symYear.sym
+        val year = symYear.year
 
         val avgPerYQuotesClosingPrice: Option[Double] =
           getAvgQuotesClosingPricePerY(companyDailyFinData.parameterQuotes, year)
 
         val yearlyShare: Option[Double] =
-          companyYearlyFinData.shares.perYearM.get(head).map(_.value)
+          companyYearlyFinData.shares.perYearM.get(symYear).map(_.value)
 
         val marketValues: Option[Double] = for {
           avgQuote <- avgPerYQuotesClosingPrice
@@ -94,13 +93,12 @@ case class CompanyYearlyExtendedFinData(companyYearlyFinData: CompanyYearlyFinDa
 
         val nonZeroMarketValues: Option[Double] = marketValues.filter(_ != 0)
 
-        nonZeroMarketValues match {
-          case Some(v) => findMarketValuesToAdd(
-            CompanyYearlyFinDataEntry(sym, v, year) :: marketVals, symYears.tail
-          )
-          case None => findMarketValuesToAdd(marketVals, symYears.tail)
-        }
+        nonZeroMarketValues.map(v => CompanyYearlyFinDataEntry(sym, v, year))
     }
+    setOpt.foldLeft(marketVals)((acc, yearlyDataOp) => {
+      yearlyDataOp.map(_ :: acc)
+        .getOrElse(acc)
+    })
   }
 
 
