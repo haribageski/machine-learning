@@ -57,8 +57,8 @@ class CompanyYearlyExtendedFinDataTest  extends FlatSpec with Matchers {
   "filterInconsistentEntries()" should "filter out inconsistent entries" in {
     val filtered: CompanyYearlyExtendedFinData = companyYearlyExtendedWithDerivedParams.filter
 
-    val divi1 = CompanyDailyFinDataEntry(sym, 0.01, DateExtended("30/03/2014"))
-    val divi2 = CompanyDailyFinDataEntry(sym, 0.02, DateExtended("09/04/2014"))
+    val divi1 = CompanyDailyFinDataEntry(sym, 0.01, DateExtended.fromString("30/03/2014"))
+    val divi2 = CompanyDailyFinDataEntry(sym, 0.02, DateExtended.fromString("09/04/2014"))
     val dividend = CompanyDailyFinParameter(
       sym,
       Some(divi1),
@@ -67,8 +67,8 @@ class CompanyYearlyExtendedFinDataTest  extends FlatSpec with Matchers {
       Map(2014 -> TreeSet(divi1, divi2))
     )
 
-    val quote1 = CompanyDailyFinDataEntry(sym, 18, DateExtended("04/01/2014"))
-    val quote2 = CompanyDailyFinDataEntry(sym, 22, DateExtended("04/04/2014"))
+    val quote1 = CompanyDailyFinDataEntry(sym, 18, DateExtended.fromString("04/01/2014"))
+    val quote2 = CompanyDailyFinDataEntry(sym, 22, DateExtended.fromString("04/04/2014"))
     val quote = CompanyDailyFinParameter(
       sym,
       Some(quote1),
@@ -77,8 +77,8 @@ class CompanyYearlyExtendedFinDataTest  extends FlatSpec with Matchers {
       Map(2014 -> TreeSet(quote1, quote2))
     )
 
-    val sue1 = CompanyDailyFinDataEntry(sym, -1.12000000476837, DateExtended("17/11/2014"))
-    val sue2 = CompanyDailyFinDataEntry(sym, 1.51999998092651, DateExtended("13/02/2014"))
+    val sue1 = CompanyDailyFinDataEntry(sym, -1.12000000476837, DateExtended.fromString("17/11/2014"))
+    val sue2 = CompanyDailyFinDataEntry(sym, 1.51999998092651, DateExtended.fromString("13/02/2014"))
     val sue = CompanyDailyFinParameter(
       sym,
       Some(sue2),

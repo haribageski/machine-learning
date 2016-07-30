@@ -10,6 +10,7 @@ import filters.DefaultFilters._
 import filters.FilterSyntax.FilterOps
 import model.dailyNewsParameters.{CompanyAllNews, News}
 import model.sentiment.CompanyNewsSentiment
+import utils.readers.ReadableDefaults.CompanyNewsReader
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
 
 import scala.collection.immutable.TreeSet
@@ -19,23 +20,23 @@ class FiltersTest extends FlatSpec with Matchers {
 
     val sym = "EZPW"
     val dividends = List(
-      CompanyDailyFinDataEntry(sym, 0.00400000018998981, DateExtended("07/08/1998")),
-      CompanyDailyFinDataEntry(sym, 0.00400000018998981, DateExtended("20/11/1998")),
-      CompanyDailyFinDataEntry(sym, 0.00432999990880489, DateExtended("04/02/2000"))
+      CompanyDailyFinDataEntry(sym, 0.00400000018998981, DateExtended.fromString("07/08/1998")),
+      CompanyDailyFinDataEntry(sym, 0.00400000018998981, DateExtended.fromString("20/11/1998")),
+      CompanyDailyFinDataEntry(sym, 0.00432999990880489, DateExtended.fromString("04/02/2000"))
     )
 
-    val earliestD = CompanyDailyFinDataEntry(sym, 0.00432999990880489, DateExtended("04/02/2000"))
-    val oldestD = CompanyDailyFinDataEntry(sym, 0.00400000018998981, DateExtended("07/08/1998"))
+    val earliestD = CompanyDailyFinDataEntry(sym, 0.00432999990880489, DateExtended.fromString("04/02/2000"))
+    val oldestD = CompanyDailyFinDataEntry(sym, 0.00400000018998981, DateExtended.fromString("07/08/1998"))
 
     val toComp = CompanyDailyFinParameter(
       sym, Some(oldestD), Some(earliestD), dividends,
       Map(
         1998 -> TreeSet(
-          CompanyDailyFinDataEntry(sym, 0.00400000018998981, DateExtended("07/08/1998")),
-          CompanyDailyFinDataEntry(sym, 0.00400000018998981, DateExtended("20/11/1998"))
+          CompanyDailyFinDataEntry(sym, 0.00400000018998981, DateExtended.fromString("07/08/1998")),
+          CompanyDailyFinDataEntry(sym, 0.00400000018998981, DateExtended.fromString("20/11/1998"))
         ),
         2000 -> TreeSet(
-          CompanyDailyFinDataEntry(sym, 0.00432999990880489, DateExtended("04/02/2000"))
+          CompanyDailyFinDataEntry(sym, 0.00432999990880489, DateExtended.fromString("04/02/2000"))
         )
       )
     )
@@ -79,11 +80,11 @@ class FiltersTest extends FlatSpec with Matchers {
 
   "CompanyAllNewsFilter.filter(consistentYears: Set[Int])" should
     "return CompanyAllNewsFilter that contains only consistent in year entries" in {
-    val news1 = News("A", DateExtended("10/03/2015"), 2015,
+    val news1 = News("A", DateExtended.fromString("10/03/2015"), 2015,
       "Agilent Technologies Receives $47.28 Consensus Price Target from Brokerages ...",
       "Agilent Technologies Receives $47.28 Consensus Price Target from Brokerages ... WKRB News - Mar 10, 2015 Agilent Technologies logo Shares of Agilent Technologies (NYSE:A) have received an average rating of ?Hold? from the fourteen analysts that are covering the company, American Banking News reports. Nine research analysts have rated the stock with a hold&nbsp;..."
     )
-    val news2 = News("A", DateExtended("10/03/2014"), 2014,
+    val news2 = News("A", DateExtended.fromString("10/03/2014"), 2014,
       "First Call Rating Update on Agilent Technologies, Inc.",
       "First Call Rating Update on Agilent Technologies, Inc. Ashburn Daily - Mar 11, 2015 Agilent Technologies, Inc. (NYSE:A) was down 2.66% or 1.11 points for the day. The opening trade was executed at $41.22 and the final trade was executed at $40.63.UBS Rating Disclosure on Agilent Technologies, Inc. - Markets BureauStocks to Watch: Agilent Technologies Inc , Service Corporation International ... - Rock Hill Daily"
     )
@@ -109,25 +110,25 @@ class FiltersTest extends FlatSpec with Matchers {
       CompanyYearlyFinData(symbol, companyYearlyFinParameter2, companyYearlyFinParameter2, CompanyYearlyFinParameter("A"), companyYearlyFinParameter2)
 
     val dividends = List(
-      CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("07/08/2012")),
-      CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("07/08/2013")),
-      CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("20/11/2015")),
-      CompanyDailyFinDataEntry(symbol, 0.00432999990880489, DateExtended("04/02/2015"))
+      CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended.fromString("07/08/2012")),
+      CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended.fromString("07/08/2013")),
+      CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended.fromString("20/11/2015")),
+      CompanyDailyFinDataEntry(symbol, 0.00432999990880489, DateExtended.fromString("04/02/2015"))
     )
-    val earliestD = CompanyDailyFinDataEntry(symbol, 0.00432999990880489, DateExtended("04/02/2015"))
-    val oldestD = CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("07/08/2012"))
+    val earliestD = CompanyDailyFinDataEntry(symbol, 0.00432999990880489, DateExtended.fromString("04/02/2015"))
+    val oldestD = CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended.fromString("07/08/2012"))
     val companyDailyFinParam = CompanyDailyFinParameter(
       symbol, Some(oldestD), Some(earliestD), dividends,
       Map(
         2012 -> TreeSet(
-          CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("07/08/2012"))
+          CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended.fromString("07/08/2012"))
         ),
         2013 -> TreeSet(
-          CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("07/08/2013"))
+          CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended.fromString("07/08/2013"))
         ),
         2015 -> TreeSet(
-          CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended("20/11/2015")),
-          CompanyDailyFinDataEntry(symbol, 0.00432999990880489, DateExtended("04/02/2015"))
+          CompanyDailyFinDataEntry(symbol, 0.00400000018998981, DateExtended.fromString("20/11/2015")),
+          CompanyDailyFinDataEntry(symbol, 0.00432999990880489, DateExtended.fromString("04/02/2015"))
         )
       )
     )
@@ -136,29 +137,32 @@ class FiltersTest extends FlatSpec with Matchers {
     val yearlyExtendedFinData = CompanyYearlyExtendedFinData(companyYearlyFinData, companyDailyFinData)
       .deriveAdditionalFinParameters()
 
-    val sentimentInOneGo: CompanyNewsSentiment = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(symbol)
+    val allCompanyNews = CompanyNewsReader.readDataFromFile(symbol)
+    val sentimentInOneGo: CompanyNewsSentiment = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(allCompanyNews)
 
 
     val combinedCompanyParameters = CombinedCompanyParameters(symbol, yearlyExtendedFinData, sentimentInOneGo)
     val combinedCompanyParametersFiltered = combinedCompanyParameters.filter
 
     combinedCompanyParametersFiltered.newsSentiment should be
-      sentimentInOneGo.filter(yearlyExtendedFinData.filter.companyYearlyFinData.accrual.perYearM.keySet.map(_.year))
+      sentimentInOneGo.filter(
+        yearlyExtendedFinData.companyDailyFinData.parameterSUEs.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
+      )
 
     combinedCompanyParametersFiltered.yearlyExtendedFinData should be
-      yearlyExtendedFinData.filter(sentimentInOneGo.avgSentiPerDateDescript.keySet.map(_.dateExtended.getYear))
+      yearlyExtendedFinData.filter(sentimentInOneGo.avgSentiPerDateDescript.keySet.map(_.getYear))
   }
 
 
 
   "CompanyNewsSentimentFilter" should
-    "return CompanyNewsSentimentFilter consistent with the given years" in {
-    val sentimentInOneGo: CompanyNewsSentiment = SentimentAnalyzer.evaluateSentiOfAllCompanyNews("Example")
-    val filteredSentiment = sentimentInOneGo.filter(Set(2014))
+    "return CompanyNewsSentimentFilter consistent with the given dates" in {
+    val allCompanyNews = CompanyNewsReader.readDataFromFile("Example")
+    val sentimentInOneGo: CompanyNewsSentiment = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(allCompanyNews)
+    val filteredSentiment: CompanyNewsSentiment = sentimentInOneGo.filter(
+      Set(DateExtended.fromString("18/06/2013")))
 
     filteredSentiment.avgSentiPerDateDescript should be
-      sentimentInOneGo.avgSentiPerDateDescript.filterKeys(_.dateExtended.getYear == 2014)
-    filteredSentiment.avgSentiPerDateTitle should be
-      sentimentInOneGo.avgSentiPerDateTitle.filterKeys(_.dateExtended.getYear == 2014)
+      sentimentInOneGo.avgSentiPerDateDescript.filterKeys(_ != DateExtended.fromString("18/06/2013"))
   }
 }

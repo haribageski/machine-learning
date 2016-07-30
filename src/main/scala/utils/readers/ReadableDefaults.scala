@@ -117,7 +117,7 @@ object ReadableDefaults {
       val inputDataFromFile: List[List[String]] = ColumnsReader.readColumnsFromFile(filePath)
       val allCompanyNews = inputDataFromFile.map {line =>
         val date = DateExtended(line(1))
-        News(symbol, date, date.dateExtended.getYear, line(2), line(3))
+        News(symbol, date.dateExtended, date.dateExtended.getYear, line(2), line(3))
       }
       CompanyAllNews(symbol, allCompanyNews)
     }

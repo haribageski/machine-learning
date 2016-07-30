@@ -17,6 +17,7 @@ import cats.syntax.semigroup._
 import model.DateExtended
 import model.dailyNewsParameters.CompanyAllNews
 import edu.stanford.nlp.util._
+import org.joda.time.DateTime
 
 
 object SentimentAnalyzer {
@@ -57,28 +58,24 @@ object SentimentAnalyzer {
       SentimentMonoid.empty
   }
 
-
-
-  def evaluateSentiOfAllCompanyNews(symbol: String): CompanyNewsSentiment = {
-    val allCompanyNews: CompanyAllNews = CompanyNewsReader.readDataFromFile(symbol)
-
-    val titlesSentimentWithDate: List[(DateExtended, Sentiment)] =
+  def evaluateSentiOfAllCompanyNews(allCompanyNews: CompanyAllNews): CompanyNewsSentiment = {
+    val titlesSentimentWithDate: List[(DateTime, Sentiment)] =
       allCompanyNews.news.map(news => (news.dateOfNews, evaluateSentiOfText(news.title)))
-    val descriptionsSentimentWithDate: List[(DateExtended, Sentiment)] =
+    val descriptionsSentimentWithDate: List[(DateTime, Sentiment)] =
       allCompanyNews.news.map(news => (news.dateOfNews, evaluateSentiOfText(news.description)))
 
-    val titlesSentisPerDate: Map[DateExtended, List[Sentiment]] =
+    val titlesSentisPerDate: Map[DateTime, List[Sentiment]] =
       titlesSentimentWithDate.groupBy(_._1)
           .mapValues(_.map(_._2))
 
-    val descriptionsSentisPerDate: Map[DateExtended, List[Sentiment]] =
+    val descriptionsSentisPerDate: Map[DateTime, List[Sentiment]] =
       descriptionsSentimentWithDate.groupBy(_._1)
         .mapValues(_.map(_._2))
 
     val avgTitlesSentisPerDate = titlesSentisPerDate.mapValues(findAvgSenti)
     val avgDescriptionsSentisPerDate = descriptionsSentisPerDate.mapValues(findAvgSenti)
 
-    CompanyNewsSentiment(symbol, avgTitlesSentisPerDate, avgDescriptionsSentisPerDate)
+    CompanyNewsSentiment(allCompanyNews.symbol, avgTitlesSentisPerDate, avgDescriptionsSentisPerDate)
   }
 
 

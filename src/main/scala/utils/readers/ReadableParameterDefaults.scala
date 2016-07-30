@@ -22,7 +22,7 @@ object ReadableParameterDefaults {
 
       val entries: List[CompanyDailyFinDataEntry] =
         filteredInput.map(line =>
-          CompanyDailyFinDataEntry(symbol, line(indexOfValue).toDouble, DateExtended(line(1)))
+          CompanyDailyFinDataEntry(symbol, line(indexOfValue).toDouble, DateExtended.fromString(line(1)))
         )
 
       val newCompanyDailyFinData = CompanyDailyFinParameter(symbol)

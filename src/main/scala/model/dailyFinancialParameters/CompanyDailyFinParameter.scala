@@ -5,6 +5,7 @@ import model.DateExtended
 import scala.annotation.tailrec
 import scala.collection.immutable.TreeSet
 import utils.ordered.OrderedSyntax.{OrderedCompanyDailyFinDataEntry, OrderedDateExtended}
+import utils.ordered.OrderedSyntax._
 
 case class CompanyDailyFinParameter(symbol: String,
                                     oldestEntryO: Option[CompanyDailyFinDataEntry],
@@ -28,7 +29,7 @@ case class CompanyDailyFinParameter(symbol: String,
   def addEntry(entry: CompanyDailyFinDataEntry): CompanyDailyFinParameter = {
 
     if (entry.symbol == symbol) {
-      val year = entry.date.dateExtended.getYear
+      val year = entry.date.getYear
       val mapValueTotalPerYear: TreeSet[CompanyDailyFinDataEntry] = groupedByYearM.getOrElse(year, TreeSet())
 
       allCompanyEntriesOfOneDailyParam match {

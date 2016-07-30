@@ -1,9 +1,9 @@
 package model.dailyFinancialParameters
 
-import model.DateExtended
+import org.joda.time.DateTime
 
-case class CompanyDailyFinDataEntry(symbol: String, value: Double, date: DateExtended) {
-  def setDate(d: DateExtended): CompanyDailyFinDataEntry = {
+case class CompanyDailyFinDataEntry(symbol: String, value: Double, date: DateTime) {
+  def setDate(d: DateTime): CompanyDailyFinDataEntry = {
     copy(date = d)
   }
 

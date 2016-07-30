@@ -3,6 +3,7 @@ package utils.ordered
 import model.{DateExtended, SymDate, SymYear}
 import model.dailyFinancialParameters.CompanyDailyFinDataEntry
 import model.yearlyFinancialParameters.CompanyYearlyFinDataEntry
+import org.joda.time.DateTime
 
 /**
   * Set of interface-classes that wrap a class and make it Ordered.
@@ -12,6 +13,12 @@ object OrderedSyntax {
   implicit class OrderedDateExtended(dateExtended: DateExtended) extends Ordered[DateExtended] {
     override def compare(other: DateExtended): Int = {
       dateExtended.dateExtended.compareTo(other.dateExtended)
+    }
+  }
+
+  implicit class OrderedDateTime(dateTime: DateTime) extends Ordered[DateTime] {
+    override def compare(other: DateTime): Int = {
+      dateTime.compareTo(other)
     }
   }
 
