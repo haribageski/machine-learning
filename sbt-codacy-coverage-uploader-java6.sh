@@ -9,7 +9,7 @@ if [ -z "${PROJECT_TOKEN}" ]; then
     exit 1
 fi
 
-COMMIT_UUID="ad71cb4"
+COMMIT_UUID="902122a"
 
 if [[ $? != 0 ]]; then
     echo "Not a valid git repository."
@@ -29,6 +29,9 @@ fi
 
 COVERAGE_REPORT_CONTENT=`cat ${COVERAGE_REPORT}`
 
-curl -X POST http://api.codacy.com/2.0/coverage/${COMMIT_UUID}/scala -d ${COVERAGE_REPORT_CONTENT} \
---header "Content-Type: application/json" \
---header "project_token: ${PROJECT_TOKEN}"
+
+
+curl -X POST https://api.codacy.com/2.0/coverage/902122af0d8db91eb3c421734a758b757c0644ef/scala \
+-d ${COVERAGE_REPORT_CONTENT} \
+-H "project_token: 121b6640c935487eb76203b8f88cd4d7" \
+-H 'Content-Type:application/json'
