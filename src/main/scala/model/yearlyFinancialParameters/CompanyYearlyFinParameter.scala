@@ -60,7 +60,7 @@ case class CompanyYearlyFinParameter(symbol: String,
       }
     }
     else {
-      println("Entry meant for wrong company. Cannot be added")
+      println(s"Entry meant for $symbol, but found one for ${entry.symbol}. Cannot be added")
       this
     }
   }

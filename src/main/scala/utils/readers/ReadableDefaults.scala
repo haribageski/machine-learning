@@ -1,10 +1,12 @@
 package utils.readers
 
+import analyzers.SentimentAnalyzer
 import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinParameter}
 import model.dailyNewsParameters.{CompanyAllNews, News}
-import model.DateExtended
-import model.yearlyFinancialParameters.{CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
+import model.{CombinedCompanyParameters, DateExtended}
+import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import utils.readers.ReadableColumnsDefaults.ColumnsReader
+import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
 import filters.DefaultFilters.CompanyDailyFinDataFilter
 import filters.FilterSyntax.FilterOps
@@ -123,4 +125,18 @@ object ReadableDefaults {
     }
   }
 
+  implicit object CombinedCompanyParametersReader extends Readable[CombinedCompanyParameters] {
+    override def readDataFromFile(sym: String): CombinedCompanyParameters = {
+      val allCompanyNews = CompanyNewsReader.readDataFromFile(sym)
+
+      CombinedCompanyParameters(
+        sym,
+        CompanyYearlyExtendedFinData(
+          CompanyYearlyFinDataReader.readDataFromFile(sym),
+          CompanyDailyFinDataReader.readDataFromFile(sym)
+        ).deriveAdditionalFinParameters(),
+        SentimentAnalyzer.evaluateSentiOfAllCompanyNews(allCompanyNews)
+      )
+    }
+  }
 }
