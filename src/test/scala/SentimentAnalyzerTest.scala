@@ -3,7 +3,6 @@ import model.DateExtended
 import model.dailyNewsParameters.{CompanyAllNews, News}
 import model.sentiment.CompanyNewsSentiment
 import org.scalatest.{FlatSpec, Matchers}
-import utils.readers.ReadableDefaults.CompanyNewsReader
 
 class SentimentAnalyzerTest  extends FlatSpec with Matchers {
   "evaluateSentiOfAllCompanyNews()" should
@@ -25,8 +24,9 @@ class SentimentAnalyzerTest  extends FlatSpec with Matchers {
       symbol,
       List(news1, news2, news3)
     )
-    val allCompanyNews = CompanyNewsReader.readDataFromFile(symbol)
-    val sentimentInOneGo: CompanyNewsSentiment = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(allCompanyNews)
+
+    val sentimentInOneGo: CompanyNewsSentiment = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(companyAllNews)
+
     val sentimentAvgTitle1 = SentimentAnalyzer.findAvgSenti(List(
       SentimentAnalyzer.evaluateSentiOfText(news1.title),
       SentimentAnalyzer.evaluateSentiOfText(news2.title)

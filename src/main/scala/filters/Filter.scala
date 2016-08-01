@@ -148,30 +148,11 @@ object DefaultFilters {
       val emptyCompanyYearlyFinParameter: CompanyYearlyFinParameter =
         CompanyYearlyFinParameter(companyYearlyFinParameter.symbol, None, None, Map.empty, List())
 
+      val allEntries: List[CompanyYearlyFinDataEntry] = companyYearlyFinParameter.allCompanyEntriesOfOneYearlyParam
 
-      @tailrec
-      def recursivelyIterateConsistentYears(allEntries: List[CompanyYearlyFinDataEntry],
-                                            yearlyFinParameter: CompanyYearlyFinParameter): CompanyYearlyFinParameter =
-        allEntries match {
-          case Nil =>
-            val listOfVals = yearlyFinParameter.allCompanyEntriesOfOneYearlyParam.reverse
-            yearlyFinParameter.copy(allCompanyEntriesOfOneYearlyParam = listOfVals)
+      val filteredEntries = allEntries.filter(entry => consistentYears.contains(entry.year))
 
-          case h :: t =>
-            if (consistentYears.contains(h.symYear.year))
-              recursivelyIterateConsistentYears(
-                t,
-                yearlyFinParameter.addEntry(h)
-              )
-            else
-              recursivelyIterateConsistentYears(
-                t,
-                yearlyFinParameter
-              )
-        }
-      recursivelyIterateConsistentYears(
-        companyYearlyFinParameter.allCompanyEntriesOfOneYearlyParam, emptyCompanyYearlyFinParameter
-      )
+      emptyCompanyYearlyFinParameter.addEntries(filteredEntries.reverse)
     }
   }
 
@@ -192,44 +173,25 @@ object DefaultFilters {
 
       //persistent entries in the extended parameters are those in BMratio
       val sym = companyYearlyFinData.symbol
-      val consistentEntries: Set[Int] = companyBMratio match {
-        case None => Set.empty
-        case Some(set) => set.perYearM.keySet.map(_.year)
-      }
+      val consistentYears: Set[Int] = companyBMratio.map(_.perYearM.keySet.map(_.year).toSet).getOrElse(Set.empty[Int])
 
-      val paramAccrual: CompanyYearlyFinParameter = CompanyYearlyFinParameterFilter.applyFilter(
-        companyYearlyFinData.accrual,
-        consistentEntries
-      )
-      val paramBookVal = CompanyYearlyFinParameterFilter.applyFilter(
-        companyYearlyFinData.bookValue,
-        consistentEntries
-      )
-      val paramROE = CompanyYearlyFinParameterFilter.applyFilter(
-        companyYearlyFinData.rOE, consistentEntries
-      )
-      val paramShares = CompanyYearlyFinParameterFilter.applyFilter(
-        companyYearlyFinData.shares, consistentEntries
-      )
+      val paramAccrual: CompanyYearlyFinParameter = companyYearlyFinData.accrual.filter(consistentYears)
 
-      val paramMarketVal: Option[CompanyYearlyFinParameter] =
-        companyMarketValues.map(CompanyYearlyFinParameterFilter.applyFilter(
-          _, consistentEntries
-        ))
-      val paramSize: Option[CompanyYearlyFinParameter] =
-        companySize.map(CompanyYearlyFinParameterFilter.applyFilter(
-          _, consistentEntries
-        ))
+      val paramBookVal = companyYearlyFinData.bookValue.filter(consistentYears)
 
-      val paramDividend = CompanyDailyFinParameterFilter.applyFilter(
-        companyDailyFinData.parameterDividends, consistentEntries
-      )
-      val paramQuotes = CompanyDailyFinParameterFilter.applyFilter(
-        companyDailyFinData.parameterQuotes, consistentEntries
-      )
-      val paramSUE = CompanyDailyFinParameterFilter.applyFilter(
-        companyDailyFinData.parameterSUEs, consistentEntries
-      )
+      val paramROE = companyYearlyFinData.rOE.filter(consistentYears)
+
+      val paramShares = companyYearlyFinData.shares.filter(consistentYears)
+
+      val paramMarketVal: Option[CompanyYearlyFinParameter] = companyMarketValues.map(_.filter(consistentYears))
+
+      val paramSize: Option[CompanyYearlyFinParameter] = companySize.map(_.filter(consistentYears))
+
+      val paramDividend = companyDailyFinData.parameterDividends.filter(consistentYears)
+
+      val paramQuotes = companyDailyFinData.parameterQuotes.filter(consistentYears)
+
+      val paramSUE = companyDailyFinData.parameterSUEs.filter(consistentYears)
 
       CompanyYearlyExtendedFinData(
         CompanyYearlyFinData(
@@ -345,14 +307,14 @@ object DefaultFilters {
       val sUEsAllEntries: List[CompanyDailyFinDataEntry] =
         allParameters.yearlyExtendedFinData.companyDailyFinData.parameterSUEs.allCompanyEntriesOfOneDailyParam
 
-      val consistentSentimentData = allParameters.newsSentiment.filter{
+      val consistentSentimentData = allParameters.newsSentiment.filter {
         sUEsAllEntries.map(_.date).toSet
       }
 
       val consistentSUEsAllEntries: List[CompanyDailyFinDataEntry] =
         sUEsAllEntries.filter { finData =>
           consistentSentimentData.avgSentiPerDateDescript.keySet.contains(finData.date) ||
-            consistentSentimentData.avgSentiPerDateDescript.keySet.contains(finData.date.plusDays(1))
+            consistentSentimentData.avgSentiPerDateDescript.keySet.contains(finData.date.minusDays(1))
         }
 
       val consistentDailyFinData =

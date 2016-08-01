@@ -77,14 +77,16 @@ class CompanyYearlyExtendedFinDataTest  extends FlatSpec with Matchers {
       Map(2014 -> TreeSet(quote1, quote2))
     )
 
-    val sue1 = CompanyDailyFinDataEntry(sym, -1.12000000476837, DateExtended.fromString("17/11/2014"))
-    val sue2 = CompanyDailyFinDataEntry(sym, 1.51999998092651, DateExtended.fromString("13/02/2014"))
+    val sue4 = CompanyDailyFinDataEntry(sym, 1, DateExtended.fromString("19/11/2014"))
+    val sue3 = CompanyDailyFinDataEntry(sym, -2, DateExtended.fromString("18/11/2014"))
+    val sue2 = CompanyDailyFinDataEntry(sym, -1.12000000476837, DateExtended.fromString("17/11/2014"))
+    val sue1 = CompanyDailyFinDataEntry(sym, 1.51999998092651, DateExtended.fromString("13/02/2014"))
     val sue = CompanyDailyFinParameter(
       sym,
-      Some(sue2),
       Some(sue1),
-      List(sue1, sue2),
-      Map(2014 -> TreeSet(sue1, sue2))
+      Some(sue4),
+      List(sue4, sue3, sue2, sue1),
+      Map(2014 -> TreeSet(sue4, sue3, sue2, sue1))
     )
 
     filtered.companyMarketValues.foreach(_ should be(marketVal))

@@ -10,7 +10,7 @@ import filters.DefaultFilters._
 import filters.FilterSyntax.FilterOps
 import model.dailyNewsParameters.{CompanyAllNews, News}
 import model.sentiment.CompanyNewsSentiment
-import utils.readers.ReadableDefaults.CompanyNewsReader
+import utils.readers.ReadableDefaults.{CombinedCompanyParametersReader, CompanyDailyFinDataReader, CompanyNewsReader, CompanyYearlyFinDataReader}
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
 
 import scala.collection.immutable.TreeSet
@@ -98,8 +98,20 @@ class FiltersTest extends FlatSpec with Matchers {
     companyAllNews.filter(Set(2014, 2015)) should be (companyAllNews)
   }
 
-  "CombinedCompanyParametersFilter.filter()" should
-    "return CombinedCompanyParametersFilter that contains only consistent in year entries" in {
+  "CompanyNewsSentimentFilter" should
+    "return CompanyNewsSentimentFilter consistent with the given dates" in {
+    val allCompanyNews = CompanyNewsReader.readDataFromFile("Example")
+    val sentimentInOneGo: CompanyNewsSentiment = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(allCompanyNews)
+    val filteredSentiment: CompanyNewsSentiment = sentimentInOneGo.filter(
+      Set(DateExtended.fromString("18/06/2013")))
+
+    filteredSentiment.avgSentiPerDateDescript should be
+    sentimentInOneGo.avgSentiPerDateDescript.filterKeys(_ != DateExtended.fromString("18/06/2013"))
+  }
+
+
+  "CombinedCompanyParametersFilter.filter(dates)" should
+    "return CombinedCompanyParametersFilter that contains only consistent in dates entries" in {
     val symbol = "Example"
     val companyYearlyFinParameter2 = CompanyYearlyFinParameter("A")
       .addEntry(CompanyYearlyFinDataEntry(symbol, 124.2, 2015))
@@ -154,15 +166,37 @@ class FiltersTest extends FlatSpec with Matchers {
   }
 
 
+  "CombinedCompanyParametersFilter.filter()" should
+    "return CombinedCompanyParametersFilter that contains only consistent in year entries" in {
+    val symbol = "Example"
+    val combinedNonFiltered = CombinedCompanyParametersReader.readDataFromFile(symbol)
+    val combinedNonFilteredWithDerivedParams = combinedNonFiltered.copy(yearlyExtendedFinData =
+      combinedNonFiltered.yearlyExtendedFinData.deriveAdditionalFinParameters())
+    val filderedCombinedParams = combinedNonFilteredWithDerivedParams.filter
 
-  "CompanyNewsSentimentFilter" should
-    "return CompanyNewsSentimentFilter consistent with the given dates" in {
-    val allCompanyNews = CompanyNewsReader.readDataFromFile("Example")
-    val sentimentInOneGo: CompanyNewsSentiment = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(allCompanyNews)
-    val filteredSentiment: CompanyNewsSentiment = sentimentInOneGo.filter(
-      Set(DateExtended.fromString("18/06/2013")))
+    filderedCombinedParams.yearlyExtendedFinData.companyDailyFinData shouldBe
+      CompanyDailyFinDataReader.readDataFromFile(symbol)
+        .filter(Set(DateExtended.fromString("17/11/2014"), DateExtended.fromString("18/11/2014")))
 
-    filteredSentiment.avgSentiPerDateDescript should be
-      sentimentInOneGo.avgSentiPerDateDescript.filterKeys(_ != DateExtended.fromString("18/06/2013"))
+    filderedCombinedParams.yearlyExtendedFinData.companyYearlyFinData shouldBe
+      combinedNonFilteredWithDerivedParams.yearlyExtendedFinData.companyYearlyFinData
+        .filter(Set(2014))
+
+    filderedCombinedParams.newsSentiment shouldBe
+      combinedNonFilteredWithDerivedParams.newsSentiment
+        .filter(Set(DateExtended.fromString("17/11/2014"), DateExtended.fromString("18/11/2014")))
+
+    filderedCombinedParams.yearlyExtendedFinData.companyBMratio shouldBe
+      combinedNonFilteredWithDerivedParams.yearlyExtendedFinData.companyBMratio
+        .map(_.filter(Set(2014)))
+
+    filderedCombinedParams.yearlyExtendedFinData.companySize shouldBe
+      combinedNonFilteredWithDerivedParams.yearlyExtendedFinData.companySize
+        .map(_.filter(Set(2014)))
+
+    filderedCombinedParams.yearlyExtendedFinData.companyMarketValues shouldBe
+      combinedNonFilteredWithDerivedParams.yearlyExtendedFinData.companyMarketValues
+        .map(_.filter(Set(2014)))
+
   }
 }
