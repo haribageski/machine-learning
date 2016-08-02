@@ -1,11 +1,7 @@
 package model.dailyFinancialParameters
 
-import model.DateExtended
-
-import scala.annotation.tailrec
 import scala.collection.immutable.TreeSet
-import utils.ordered.OrderedSyntax.{OrderedCompanyDailyFinDataEntry, OrderedDateExtended}
-import utils.ordered.OrderedSyntax._
+import utils.ordered.OrderedSyntax.{OrderedCompanyDailyFinDataEntry, OrderedDateTime}
 
 case class CompanyDailyFinParameter(symbol: String,
                                     oldestEntryO: Option[CompanyDailyFinDataEntry],

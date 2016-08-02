@@ -1,22 +1,13 @@
 package analyzers
 
-import java.util
 import java.util.Properties
-
-import cats.{Monad, Monoid}
-
 import scala.collection.JavaConverters._
 import edu.stanford.nlp.ling.CoreAnnotations
-import edu.stanford.nlp.pipeline.Annotation
-import edu.stanford.nlp.pipeline.StanfordCoreNLP
+import edu.stanford.nlp.pipeline.{Annotation, StanfordCoreNLP}
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations
 import edu.stanford.nlp.util.CoreMap
 import model.sentiment._
-import utils.readers.ReadableDefaults.CompanyNewsReader
-import cats.syntax.semigroup._
-import model.DateExtended
 import model.dailyNewsParameters.CompanyAllNews
-import edu.stanford.nlp.util._
 import org.joda.time.DateTime
 
 
@@ -64,12 +55,10 @@ object SentimentAnalyzer {
     val descriptionsSentimentWithDate: List[(DateTime, Sentiment)] =
       allCompanyNews.news.map(news => (news.dateOfNews, evaluateSentiOfText(news.description)))
 
-    val titlesSentisPerDate: Map[DateTime, List[Sentiment]] =
-      titlesSentimentWithDate.groupBy(_._1)
+    val titlesSentisPerDate: Map[DateTime, List[Sentiment]] = titlesSentimentWithDate.groupBy(_._1)
           .mapValues(_.map(_._2))
 
-    val descriptionsSentisPerDate: Map[DateTime, List[Sentiment]] =
-      descriptionsSentimentWithDate.groupBy(_._1)
+    val descriptionsSentisPerDate: Map[DateTime, List[Sentiment]] = descriptionsSentimentWithDate.groupBy(_._1)
         .mapValues(_.map(_._2))
 
     val avgTitlesSentisPerDate = titlesSentisPerDate.mapValues(findAvgSenti)
