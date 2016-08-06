@@ -1,16 +1,15 @@
 package utils.readers
 
 import analyzers.SentimentAnalyzer
+import filters.DefaultFilterData.CompanyDailyFinDataFilter
 import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinParameter}
 import model.dailyNewsParameters.{CompanyAllNews, News}
 import model.{CombinedCompanyParameters, DateExtended}
 import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import utils.readers.ReadableColumnsDefaults.ColumnsReader
-import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
-import filters.DefaultFilters.CompanyDailyFinDataFilter
 import filters.FilterSyntax.FilterOps
-import filters.DefaultFilters.Validator._
+import filters.Validator.Validator
 
 object ReadableDefaults {
 
@@ -58,7 +57,7 @@ object ReadableDefaults {
       val indexesOfValues = Seq(2, 3, 4, 5)
       val inputDataFromFile: List[List[String]] = ColumnsReader.readColumnsFromFile(filePath)
 
-      val filteredInput: List[List[String]] = inputDataFromFile.filter(validateValueInLines(indexesOfValues))
+      val filteredInput: List[List[String]] = inputDataFromFile.filter(Validator.validateValueInLines(indexesOfValues))
       val filteredZeroShares = filteredInput.filter(line => line(3).toInt != 0)
 
       //TODO: The followint mappings can be combined and done in one iteration

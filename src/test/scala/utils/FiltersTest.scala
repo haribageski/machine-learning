@@ -6,7 +6,9 @@ import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataE
 import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
-import filters.DefaultFilters._
+import filters.DefaultFilterParameterGivenDates._
+import filters.DefaultFilterParameterGivenYears._
+import filters.DefaultFilterData._
 import filters.FilterSyntax.FilterOps
 import model.dailyNewsParameters.{CompanyAllNews, News}
 import model.sentiment.CompanyNewsSentiment

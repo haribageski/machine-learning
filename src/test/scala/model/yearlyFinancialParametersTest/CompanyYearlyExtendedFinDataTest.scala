@@ -1,15 +1,14 @@
 package model.yearlyFinancialParametersTest
 
-import filters.{DefaultFilters, FilterSyntax}
+import filters.FilterSyntax
 import model.{DateExtended, SymYear}
+import filters.DefaultFilterData._
 import model.dailyFinancialParameters._
 import utils.ordered.OrderedSyntax._
 import org.scalatest.{FlatSpec, Matchers}
-import DefaultFilters.CompanyYearlyExtendedFinDataFilter
 import utils.readers.ReadableDefaults.CompanyDailyFinDataReader
 import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader.readDataFromFile
 import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
-import DefaultFilters.CompanyYearlyExtendedFinDataFilter
 import FilterSyntax.FilterOps
 import scala.collection.immutable.{TreeMap, TreeSet}
 import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader._
