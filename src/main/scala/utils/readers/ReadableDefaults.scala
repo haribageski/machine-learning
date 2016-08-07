@@ -5,7 +5,7 @@ import filters.DefaultFilterData.CompanyDailyFinDataFilter
 import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinParameter}
 import model.dailyNewsParameters.{CompanyAllNews, News}
 import model.{CombinedCompanyParameters, DateExtended}
-import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
+import model.yearlyFinancialParameters.{CompanyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import utils.readers.ReadableColumnsDefaults.ColumnsReader
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
 import filters.FilterSyntax.FilterOps
@@ -39,8 +39,6 @@ object ReadableDefaults {
           indexOfValue = 2
         )
       )
-        .filter(CompanyDailyFinDataFilter) /*it filters out the data for which there is one of the three
-       parameters that has no entry in that year*/
     }
   }
 
@@ -130,10 +128,10 @@ object ReadableDefaults {
 
       CombinedCompanyParameters(
         sym,
-        CompanyYearlyExtendedFinData(
+        CompanyExtendedFinData(
           CompanyYearlyFinDataReader.readDataFromFile(sym),
           CompanyDailyFinDataReader.readDataFromFile(sym)
-        ).deriveAdditionalFinParameters(),
+        ),
         SentimentAnalyzer.evaluateSentiOfAllCompanyNews(allCompanyNews)
       )
     }

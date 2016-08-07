@@ -141,11 +141,11 @@ class ReadersTest  extends FlatSpec with Matchers {
     )
 
     newsRead.news(0) should be(
-      News(sym, DateExtended.fromString("30/11/2014"), 2014, "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8%",
+      News(sym, DateExtended.fromString("04/04/2014"), 2014, "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8%",
         "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8% Wall Street Pulse - Mar 2, 2015 Agilent Technologies, Inc. (NYSE:A) reported a rise of 132,877 shares or 5.8% in the short interest. The remaining shorts are 0.7% of the total floated shares.Share Price of Agilent Technologies, Inc. Rally 0.62% - Ashburn DailyAgilent Technologies Receives &quot;A-&quot; Credit Rating from Morningstar (A) - sleekmoney")
     )
     newsRead.news(1) should be(
-      News(sym, DateExtended.fromString("17/11/2014"), 2014, "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8%",
+      News(sym, DateExtended.fromString("01/04/2014"), 2014, "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8%",
         "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8% Wall Street Pulse - Mar 2, 2015 Agilent Technologies, Inc. (NYSE:A) reported a rise of 132,877 shares or 5.8% in the short interest. The remaining shorts are 0.7% of the total floated shares.Share Price of Agilent Technologies, Inc. Rally 0.62% - Ashburn DailyAgilent Technologies Receives &quot;A-&quot; Credit Rating from Morningstar (A) - sleekmoney")
     )
   }

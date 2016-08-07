@@ -2,7 +2,7 @@ package filters
 
 import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
 import model.dailyNewsParameters.CompanyAllNews
-import model.yearlyFinancialParameters.{CompanyYearlyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
+import model.yearlyFinancialParameters.{CompanyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import FilterSyntax._
 import scala.annotation.tailrec
 
@@ -82,7 +82,6 @@ object DefaultFilterParameterGivenYears {
     }
   }
 
-
   implicit object CompanyDailyFinDataFilterFromConsistentYears extends FilterParameterGivenYears[CompanyDailyFinData] {
     override def applyFilter(finData: CompanyDailyFinData, consistentYears: Set[Int]): CompanyDailyFinData = {
       CompanyDailyFinData(
@@ -95,9 +94,9 @@ object DefaultFilterParameterGivenYears {
   }
 
 
-  implicit object CompanyYearlyExtendedFinDataFilterFromConsistentYears extends FilterParameterGivenYears[CompanyYearlyExtendedFinData] {
-    override def applyFilter(finData: CompanyYearlyExtendedFinData, consistentYears: Set[Int]): CompanyYearlyExtendedFinData =
-      CompanyYearlyExtendedFinData(
+  implicit object CompanyYearlyExtendedFinDataFilterFromConsistentYears extends FilterParameterGivenYears[CompanyExtendedFinData] {
+    override def applyFilter(finData: CompanyExtendedFinData, consistentYears: Set[Int]): CompanyExtendedFinData =
+      CompanyExtendedFinData(
         finData.companyYearlyFinData.filter(consistentYears),
         finData.companyDailyFinData.filter(consistentYears),
         finData.companyMarketValues.map(_.filter(consistentYears)),

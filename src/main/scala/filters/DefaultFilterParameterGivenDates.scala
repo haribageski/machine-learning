@@ -10,13 +10,13 @@ object DefaultFilterParameterGivenDates {
 
   implicit object CompanyDailyFinParameterFilterGivenDates extends FilterParameterGivenDates[CompanyDailyFinParameter] {
 
-    override def applyFilter(companyDailyFinParameter: CompanyDailyFinParameter, consistentDatess: Set[DateTime]):
+    override def applyFilter(companyDailyFinParameter: CompanyDailyFinParameter, consistentDates: Set[DateTime]):
     CompanyDailyFinParameter = {
 
       val symbol = companyDailyFinParameter.symbol
 
       @tailrec
-      def recursivelyIterateConsistentYears(allEntries: List[CompanyDailyFinDataEntry],
+      def recursivelyIterateConsistentDates(allEntries: List[CompanyDailyFinDataEntry],
                                             dailyFinParam: CompanyDailyFinParameter): CompanyDailyFinParameter = {
         allEntries match {
           case Nil =>
@@ -24,21 +24,21 @@ object DefaultFilterParameterGivenDates {
             dailyFinParam.copy(allCompanyEntriesOfOneDailyParam = listOfVals)
 
           case head :: tail =>
-            if (consistentDatess.contains(head.date)) {
+            if (consistentDates.contains(head.date)) {
               val paramWithAddedEntry = dailyFinParam.addEntry(head)
-              recursivelyIterateConsistentYears(
+              recursivelyIterateConsistentDates(
                 tail,
                 paramWithAddedEntry
               )
             }
             else
-              recursivelyIterateConsistentYears(
+              recursivelyIterateConsistentDates(
                 tail,
                 dailyFinParam
               )
         }
       }
-      recursivelyIterateConsistentYears(
+      recursivelyIterateConsistentDates(
         companyDailyFinParameter.allCompanyEntriesOfOneDailyParam, CompanyDailyFinParameter(symbol)
       )
     }
@@ -51,7 +51,7 @@ object DefaultFilterParameterGivenDates {
       CompanyDailyFinData(
         value.symbol,
         value.parameterDividends.filter(consistentDates),
-        value.parameterQuotes.filter(consistentDates),
+        value.parameterQuotes.filter(consistentDates ++ consistentDates.map(_.plusDays(1))),
         value.parameterSUEs.filter(consistentDates)
       )
     }
@@ -69,11 +69,11 @@ object DefaultFilterParameterGivenDates {
 
       val consistentAvgTitleM: Map[DateTime, Sentiment] =
         companySentiments.avgSentiPerDateTitle.filterKeys{
-          dateE => consistentDates.contains(dateE) && consistentDates.contains(dateE.plusDays(1))
+          dateE => consistentDates.contains(dateE) //&& consistentDates.contains(dateE.plusDays(1))
         }
       val consistentAvgDescriptM: Map[DateTime, Sentiment] =
         companySentiments.avgSentiPerDateDescript.filterKeys{
-          dateE => consistentDates.contains(dateE) && consistentDates.contains(dateE.plusDays(1))
+          dateE => consistentDates.contains(dateE)// && consistentDates.contains(dateE.plusDays(1))
         }
 
       CompanyNewsSentiment(companySentiments.sym, consistentAvgTitleM, consistentAvgDescriptM)
