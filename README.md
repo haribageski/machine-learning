@@ -5,4 +5,7 @@ In order to send coverage to codacy run:
 `sbt clean coverage test`
 `sbt coverageReport`
 `export CODACY_PROJECT_TOKEN=Project_Token`
+`sbt codacyCoverage`
+If the last command doesn't work, then run:
 `sh ./sbt-codacy-coverage-uploader.sh`
+
