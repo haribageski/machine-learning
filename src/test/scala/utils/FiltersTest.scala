@@ -210,6 +210,5 @@ class FiltersTest extends FlatSpec with Matchers {
     filderedCombinedParams.extendedFinData.companyMarketValues shouldBe
       combinedNonFilteredWithDerivedParams.extendedFinData.companyMarketValues
         .map(_.filter(Set(2014)))
-
   }
 }
