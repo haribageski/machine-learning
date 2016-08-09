@@ -6,8 +6,9 @@ import model.sentiment.Sentiment
 import model.yearlyFinancialParameters.CompanyYearlyFinDataEntry
 import org.joda.time.DateTime
 
-class TrainingMatrixBuilder {
-  def createMatrix(companies: List[CombinedCompanyParameters]) = {
+object TrainingMatrixBuilder {
+  //We expect the input parameter to be filtered out from inconsistent entries
+  def createMatrix(companies: List[CombinedCompanyParameters]): (Set[List[Double]], Set[Double]) = {
 
     def iterate(companies: List[CombinedCompanyParameters], acc: Set[(List[Double], Double)]):
     (Set[List[Double]], Set[Double]) = companies match {
@@ -53,7 +54,7 @@ class TrainingMatrixBuilder {
       (List(mapDividends(dateTime), mapSUE(dateTime), mapQuotes(dateTime),
         newsTitles(dateTime).neut, newsTitles(dateTime).neg, newsTitles(dateTime).pos,
         newsDescript(dateTime).neut, newsDescript(dateTime).neg, newsDescript(dateTime).pos),
-        resultQuotesMap(dateTime))
+        resultQuotesMap(dateTime.plusDays(1)))
     )
   }
 

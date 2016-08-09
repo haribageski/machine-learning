@@ -1,19 +1,18 @@
-package model.yearlyFinancialParametersTest
+package model
 
-import filters.FilterSyntax
-import model.{DateExtended, SymYear}
 import filters.DefaultFilterData._
+import filters.FilterSyntax
+import filters.FilterSyntax.FilterOps
 import model.dailyFinancialParameters._
-import utils.ordered.OrderedSyntax._
+import model.yearlyFinancialParameters.{CompanyExtendedFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import org.scalatest.{FlatSpec, Matchers}
+import utils.ordered.OrderedSyntax._
 import utils.readers.ReadableDefaults.CompanyDailyFinDataReader
 import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader.readDataFromFile
-import model.yearlyFinancialParameters.{CompanyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
-import FilterSyntax.FilterOps
-import scala.collection.immutable.{TreeMap, TreeSet}
-import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader._
 
-class CompanyExtendedFinDataTest  extends FlatSpec with Matchers {
+import scala.collection.immutable.{TreeMap, TreeSet}
+
+class CompanyExtendedFinDataSpec  extends FlatSpec with Matchers {
 
   val sym = "Example"
   val companyYearlyExtendedFinData = CompanyExtendedFinData(
@@ -71,13 +70,15 @@ class CompanyExtendedFinDataTest  extends FlatSpec with Matchers {
 
     val quote1 = CompanyDailyFinDataEntry(sym, 18, DateExtended.fromString("04/01/2014"))
     val quote2 = CompanyDailyFinDataEntry(sym, 22, DateExtended.fromString("04/04/2014"))
+    val quote3 = CompanyDailyFinDataEntry(sym, 18, DateExtended.fromString("05/01/2014"))
+    val quote4 = CompanyDailyFinDataEntry(sym, 22, DateExtended.fromString("05/04/2014"))
 
     val quote = CompanyDailyFinParameter(
       sym,
       Some(quote1),
-      Some(quote2),
-      List(quote2, quote1),
-      Map(2014 -> TreeSet(quote1, quote2))
+      Some(quote4),
+      List(quote4, quote2, quote3, quote1),
+      Map(2014 -> TreeSet(quote1, quote3, quote2, quote4))
     )
 
     val sue1 = CompanyDailyFinDataEntry(sym, 1.51999998092651, DateExtended.fromString("04/01/2014"))

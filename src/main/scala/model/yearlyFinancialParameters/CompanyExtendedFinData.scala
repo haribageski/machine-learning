@@ -41,22 +41,13 @@ case class CompanyExtendedFinData(companyYearlyFinData: CompanyYearlyFinData,
       )
 
     val companyMarketValuesWithAddedNewValues: Option[CompanyYearlyFinParameter] =
-      companyMarketValues match {
-        case Some(marketVal) => Some(marketVal.addEntries(marketValsToAdd))
-        case None => Some(CompanyYearlyFinParameter(sym).addEntries(marketValsToAdd))
-      }
+      Some(CompanyYearlyFinParameter(sym).addEntries(marketValsToAdd))
 
     val companyBMratioWithAddedNewValues: Option[CompanyYearlyFinParameter] =
-      companyBMratio match {
-        case Some(bMratio) => Some(bMratio.addEntries(bMratiosToAdd))
-        case None => Some(CompanyYearlyFinParameter(sym).addEntries(bMratiosToAdd))
-      }
+      Some(CompanyYearlyFinParameter(sym).addEntries(bMratiosToAdd))
 
     val companySizeWithAddedNewValues: Option[CompanyYearlyFinParameter] =
-      companySize match {
-        case Some(cSize) => Some(cSize.addEntries(sizeValsYearlyToAdd))
-        case None => Some(CompanyYearlyFinParameter(sym).addEntries(sizeValsYearlyToAdd))
-      }
+      Some(CompanyYearlyFinParameter(sym).addEntries(sizeValsYearlyToAdd))
 
     CompanyExtendedFinData(
       companyYearlyFinData,

@@ -9,7 +9,7 @@ import scala.collection.immutable.TreeSet
 /**
   * Created by hari on 16/03/16.
   */
-class CompanyDailyFinDataEntryTest extends FlatSpec with Matchers {
+class CompanyDailyFinDataEntrySpec extends FlatSpec with Matchers {
   "Instance of DailyFinData " should "be correctly constructed" in {
     val dailyFinData = CompanyDailyFinDataEntry("A", 1000, DateExtended.fromString("01/01/2015"))
     dailyFinData.value should be(1000)

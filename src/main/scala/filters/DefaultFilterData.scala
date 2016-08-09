@@ -10,26 +10,44 @@ import org.joda.time.DateTime
 
 object DefaultFilterData {
 
+  implicit object CompanyYearlyFinDataFilter extends FilterData[CompanyYearlyFinData] {
+    override def applyFilter(value: CompanyYearlyFinData): CompanyYearlyFinData = {
+      val consistentYears = value.shares.allCompanyEntriesOfOneYearlyParam.map(_.year)
+        .intersect(value.rOE.allCompanyEntriesOfOneYearlyParam.map(_.year))
+        .intersect(value.bookValue.allCompanyEntriesOfOneYearlyParam.map(_.year))
+        .intersect(value.accrual.allCompanyEntriesOfOneYearlyParam.map(_.year))
+        .toSet
+
+      value.copy(
+        bookValue = value.bookValue.filter(consistentYears),
+        shares = value.shares.filter(consistentYears),
+        rOE = value.rOE.filter(consistentYears),
+        accrual = value.accrual.filter(consistentYears)
+      )
+    }
+  }
+
   implicit object CompanyDailyFinDataFilter extends FilterData[CompanyDailyFinData] {
     override def applyFilter(companyDailyFinData: CompanyDailyFinData): CompanyDailyFinData = {
       val symbol = companyDailyFinData.symbol
-      val parameterDividends = companyDailyFinData.parameterDividends
-      val parameterQuotes = companyDailyFinData.parameterQuotes
-      val parameterSUEs = companyDailyFinData.parameterSUEs
-
-      val allQuotesDates: List[DateTime] = parameterQuotes.allCompanyEntriesOfOneDailyParam.map(_.date)
-      val relevantQuotesDates = allQuotesDates.filter(date => allQuotesDates.contains(date.plusDays(1)))
+      val parameterDividends = companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
+      val parameterQuotes = companyDailyFinData.parameterQuotes.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
+      val parameterSUEs = companyDailyFinData.parameterSUEs.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
 
       val intersectAllThreeDailyParamsYears =
-        relevantQuotesDates
-          .intersect(parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date))
-          .intersect(parameterSUEs.allCompanyEntriesOfOneDailyParam.map(_.date))
+        parameterDividends
+          .intersect(parameterSUEs)
+          .intersect(parameterQuotes)
+        .filter(dateTime => parameterQuotes.contains(dateTime.plusDays(1)))
 
-      val dividendsToAdd = parameterDividends.allCompanyEntriesOfOneDailyParam.filter(param =>
+      val withConsecutiveQuotes = parameterQuotes.intersect(intersectAllThreeDailyParamsYears) ++
+        parameterQuotes.intersect(intersectAllThreeDailyParamsYears.map(_.plusDays(1)))
+
+      val dividendsToAdd = companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam.filter(param =>
         intersectAllThreeDailyParamsYears.contains(param.date))
-      val quotesToAdd = parameterQuotes.allCompanyEntriesOfOneDailyParam.filter(param =>
-        intersectAllThreeDailyParamsYears.contains(param.date))
-      val sUEsToAdd = parameterSUEs.allCompanyEntriesOfOneDailyParam.filter(param =>
+      val quotesToAdd = companyDailyFinData.parameterQuotes.allCompanyEntriesOfOneDailyParam.filter(param =>
+        withConsecutiveQuotes.contains(param.date))
+      val sUEsToAdd = companyDailyFinData.parameterSUEs.allCompanyEntriesOfOneDailyParam.filter(param =>
         intersectAllThreeDailyParamsYears.contains(param.date))
 
 
@@ -52,33 +70,43 @@ object DefaultFilterData {
       * parameters. NaN values are already filtered out.
       */
     override def applyFilter(companyExtendedFinData: CompanyExtendedFinData): CompanyExtendedFinData = {
-      val companyYearlyFinData = companyExtendedFinData.companyYearlyFinData
-      val companyBMratio = companyExtendedFinData.companyBMratio
-      val companyMarketValues = companyExtendedFinData.companyMarketValues
-      val companySize = companyExtendedFinData.companySize
-      val companyDailyFinData = companyExtendedFinData.companyDailyFinData.filter   //returns consistent dailyFinData
+      val companyDailyFinDataFiltered = companyExtendedFinData.companyDailyFinData.filter   //returns consistent dailyFinData
+      val companyExtendedWithDerivedParams: CompanyExtendedFinData =
+        companyExtendedFinData.copy(companyDailyFinData = companyDailyFinDataFiltered).deriveAdditionalFinParameters
+      val companyYearlyFinData = companyExtendedWithDerivedParams.companyYearlyFinData.filter
+      val companyBMratio = companyExtendedWithDerivedParams.companyBMratio
+      val companyMarketValues = companyExtendedWithDerivedParams.companyMarketValues
+      val companySize = companyExtendedWithDerivedParams.companySize
 
-      //persistent entries in the extended parameters are those in BMratio
       val sym = companyYearlyFinData.symbol
-      val consistentYears: Set[Int] = companyBMratio.map(_.perYearM.keySet.map(_.year).toSet).getOrElse(Set.empty[Int])
+      val consistentYears: Set[Int] = companyYearlyFinData.accrual.allCompanyEntriesOfOneYearlyParam.map(_.year).toSet
+        .intersect(companyBMratio.map(_.perYearM.keySet.map(_.year).toSet).getOrElse(Set.empty[Int]))
+        .intersect(companyMarketValues.map(_.perYearM.keySet.map(_.year).toSet).getOrElse(Set.empty[Int]))
+        .intersect(companySize.map(_.perYearM.keySet.map(_.year).toSet).getOrElse(Set.empty[Int]))
 
-      val paramAccrual: CompanyYearlyFinParameter = companyYearlyFinData.accrual.filter(consistentYears)
+      val consistentDatesGivenYears: Set[DateTime] =
+        companyDailyFinDataFiltered.parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
+        .filter(date => consistentYears.contains(date.getYear))
+      val consistentYearsGivenDates = consistentYears.intersect(consistentDatesGivenYears.map(_.getYear))
 
-      val paramBookVal = companyYearlyFinData.bookValue.filter(consistentYears)
+      val paramAccrual: CompanyYearlyFinParameter = companyYearlyFinData.accrual.filter(consistentYearsGivenDates)
 
-      val paramROE = companyYearlyFinData.rOE.filter(consistentYears)
+      val paramBookVal = companyYearlyFinData.bookValue.filter(consistentYearsGivenDates)
 
-      val paramShares = companyYearlyFinData.shares.filter(consistentYears)
+      val paramROE = companyYearlyFinData.rOE.filter(consistentYearsGivenDates)
 
-      val paramMarketVal: Option[CompanyYearlyFinParameter] = companyMarketValues.map(_.filter(consistentYears))
+      val paramShares = companyYearlyFinData.shares.filter(consistentYearsGivenDates)
 
-      val paramSize: Option[CompanyYearlyFinParameter] = companySize.map(_.filter(consistentYears))
+      val paramMarketVal: Option[CompanyYearlyFinParameter] = companyMarketValues.map(_.filter(consistentYearsGivenDates))
 
-      val paramDividend = companyDailyFinData.parameterDividends.filter(consistentYears)
+      val paramSize: Option[CompanyYearlyFinParameter] = companySize.map(_.filter(consistentYearsGivenDates))
 
-      val paramQuotes = companyDailyFinData.parameterQuotes.filter(consistentYears)
+      val paramDividend = companyDailyFinDataFiltered.parameterDividends.filter(consistentDatesGivenYears)
 
-      val paramSUE = companyDailyFinData.parameterSUEs.filter(consistentYears)
+      val paramQuotes = companyDailyFinDataFiltered.parameterQuotes
+        .filter(consistentDatesGivenYears ++ consistentDatesGivenYears.map(_.plusDays(1)))
+
+      val paramSUE = companyDailyFinDataFiltered.parameterSUEs.filter(consistentDatesGivenYears)
 
       CompanyExtendedFinData(
         CompanyYearlyFinData(
@@ -116,23 +144,17 @@ object DefaultFilterData {
       val consistentFinancialData: CompanyExtendedFinData =
         allParameters.extendedFinData.filter
 
-      val dividendAllEntries: List[CompanyDailyFinDataEntry] =
-        consistentFinancialData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam
+      val consistentDatesOfFinDataIntersectSentimentDates: Set[DateTime] =
+        consistentFinancialData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
+        .intersect(allParameters.newsSentiment.avgSentiPerDateDescript.keySet)
 
-      val consistentSentimentData = allParameters.newsSentiment.filter {
-        dividendAllEntries.map(_.date).toSet
-      }
-
-      val consistentDividendsAllEntries: List[CompanyDailyFinDataEntry] =
-        dividendAllEntries.filter { finData =>
-          consistentSentimentData.avgSentiPerDateDescript.keySet.contains(finData.date)
-        }
+      val consistentSentimentData = allParameters.newsSentiment.filter(consistentDatesOfFinDataIntersectSentimentDates)
 
       val consistentDailyFinData =
-        consistentFinancialData.companyDailyFinData.filter(consistentDividendsAllEntries.map(_.date).toSet)
+        consistentFinancialData.companyDailyFinData.filter(consistentDatesOfFinDataIntersectSentimentDates)
 
       val consistentYearlyFinData =
-        consistentFinancialData.companyYearlyFinData.filter(consistentDailyFinData.parameterDividends.groupedByYearM.keySet)
+        consistentFinancialData.companyYearlyFinData.filter(consistentDatesOfFinDataIntersectSentimentDates.map(_.getYear))
 
 
       CombinedCompanyParameters(
@@ -140,10 +162,10 @@ object DefaultFilterData {
         CompanyExtendedFinData(
           consistentYearlyFinData,
           consistentDailyFinData,
-          allParameters.extendedFinData.companyMarketValues.map(_.filter(consistentYearlyFinData.accrual.perYearM.keySet.map(_.year))),
-          allParameters.extendedFinData.companyBMratio.map(_.filter(consistentYearlyFinData.accrual.perYearM.keySet.map(_.year))),
-          allParameters.extendedFinData.companySize.map(_.filter(consistentYearlyFinData.accrual.perYearM.keySet.map(_.year)))
-        ),
+          None,
+          None,
+          None
+        ).deriveAdditionalFinParameters,
         consistentSentimentData
       )
     }

@@ -5,7 +5,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
 import scala.collection.immutable.TreeSet
 
-class CompanyDailyFinParameterTest extends FlatSpec with Matchers {
+class CompanyDailyFinParameterSpec extends FlatSpec with Matchers {
   //synchronizeEntries() already tested indirectly in ParameterDividendsTes
   "addEntry() " should "update the CompanyDividends by constructing a new CompanyDailyFinParameter" in {
 

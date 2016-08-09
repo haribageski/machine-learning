@@ -1,24 +1,24 @@
-package utils
+package filters
 
 import analyzers.SentimentAnalyzer
-import model.{CombinedCompanyParameters, DateExtended}
-import model.DateExtended._
-import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
-import model.yearlyFinancialParameters.{CompanyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
-import org.scalatest.{FlatSpec, Matchers}
-import utils.ordered.OrderedSyntax._
+import filters.DefaultFilterData._
 import filters.DefaultFilterParameterGivenDates._
 import filters.DefaultFilterParameterGivenYears._
-import filters.DefaultFilterData._
 import filters.FilterSyntax.FilterOps
+import model.DateExtended._
+import model.dailyFinancialParameters.{CompanyDailyFinData, CompanyDailyFinDataEntry, CompanyDailyFinParameter}
 import model.dailyNewsParameters.{CompanyAllNews, News}
 import model.sentiment.CompanyNewsSentiment
-import utils.readers.ReadableDefaults.{CombinedCompanyParametersReader, CompanyDailyFinDataReader, CompanyNewsReader, CompanyYearlyFinDataReader}
+import model.yearlyFinancialParameters.{CompanyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
+import model.{CombinedCompanyParameters, DateExtended}
+import org.scalatest.{FlatSpec, Matchers}
+import utils.ordered.OrderedSyntax._
+import utils.readers.ReadableDefaults.{CombinedCompanyParametersReader, CompanyDailyFinDataReader, CompanyNewsReader}
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
 
 import scala.collection.immutable.TreeSet
 
-class FiltersTest extends FlatSpec with Matchers {
+class FiltersSpec extends FlatSpec with Matchers {
   "filter()" should "return parameter that contains only consistent in year entries" in {
 
     val sym = "EZPW"
@@ -77,7 +77,8 @@ class FiltersTest extends FlatSpec with Matchers {
       CompanyYearlyFinData("A", companyYearlyFinParameter2, companyYearlyFinParameter2, CompanyYearlyFinParameter("A"), companyYearlyFinParameter2)
     val companyDailyFinData = CompanyDailyFinData("A")
     val company = CompanyExtendedFinData(companyYearlyFinData, companyDailyFinData, None, None, None)
-    company.filter should be (company.copy(CompanyYearlyFinData("A"), CompanyDailyFinData("A")))
+    company.filter.companyDailyFinData should be (CompanyDailyFinData("A"))
+    company.filter.companyYearlyFinData should be (CompanyYearlyFinData("A"))
   }
 
 
@@ -116,7 +117,7 @@ class FiltersTest extends FlatSpec with Matchers {
   "CombinedCompanyParametersFilter.filter(dates)" should
     "return CombinedCompanyParametersFilter that contains only consistent in dates entries" in {
     val symbol = "Example"
-    val companyYearlyFinParameter2 = CompanyYearlyFinParameter("A")
+    val companyYearlyFinParameter2 = CompanyYearlyFinParameter("Example")
       .addEntry(CompanyYearlyFinDataEntry(symbol, 124.2, 2015))
       .addEntry(CompanyYearlyFinDataEntry(symbol, 124.2, 2014))
       .addEntry(CompanyYearlyFinDataEntry(symbol, 124.2, 2013))
@@ -176,38 +177,38 @@ class FiltersTest extends FlatSpec with Matchers {
     val symbol = "Example"
     val combinedNonFiltered = CombinedCompanyParametersReader.readDataFromFile(symbol)
     val combinedNonFilteredWithDerivedParams = combinedNonFiltered.copy(extendedFinData =
-      combinedNonFiltered.extendedFinData.deriveAdditionalFinParameters())
-    val filderedCombinedParams = combinedNonFilteredWithDerivedParams.filter
+      combinedNonFiltered.extendedFinData.deriveAdditionalFinParameters)
+    val filteredCombinedParams = combinedNonFiltered.filter
 
-    filderedCombinedParams.extendedFinData.companyDailyFinData.parameterDividends shouldBe
+    filteredCombinedParams.extendedFinData.companyDailyFinData.parameterDividends shouldBe
       CompanyDailyFinDataReader.readDataFromFile(symbol)
         .filter(Set(fromString("04/04/2014"))).parameterDividends
 
-    filderedCombinedParams.extendedFinData.companyDailyFinData.parameterSUEs shouldBe
+    filteredCombinedParams.extendedFinData.companyDailyFinData.parameterSUEs shouldBe
       CompanyDailyFinDataReader.readDataFromFile(symbol)
         .filter(Set(fromString("04/04/2014"))).parameterSUEs
 
-    filderedCombinedParams.extendedFinData.companyDailyFinData.parameterQuotes shouldBe
-      CompanyDailyFinDataReader.readDataFromFile(symbol).parameterDividends
-        .filter(Set(fromString("04/04/2014"), fromString("05/04/2014")))
+    filteredCombinedParams.extendedFinData.companyDailyFinData.parameterQuotes shouldBe
+      CompanyDailyFinDataReader.readDataFromFile(symbol).parameterQuotes
+        .filter(Set(fromString("05/04/2014"), fromString("04/04/2014")))
 
-    filderedCombinedParams.extendedFinData.companyYearlyFinData shouldBe
+    filteredCombinedParams.extendedFinData.companyYearlyFinData shouldBe
       combinedNonFilteredWithDerivedParams.extendedFinData.companyYearlyFinData
         .filter(Set(2014))
 
-    filderedCombinedParams.newsSentiment shouldBe
+    filteredCombinedParams.newsSentiment shouldBe
       combinedNonFilteredWithDerivedParams.newsSentiment
         .filter(Set(fromString("04/04/2014")))
 
-    filderedCombinedParams.extendedFinData.companyBMratio shouldBe
+    filteredCombinedParams.extendedFinData.companyBMratio shouldBe
       combinedNonFilteredWithDerivedParams.extendedFinData.companyBMratio
         .map(_.filter(Set(2014)))
 
-    filderedCombinedParams.extendedFinData.companySize shouldBe
+    filteredCombinedParams.extendedFinData.companySize shouldBe
       combinedNonFilteredWithDerivedParams.extendedFinData.companySize
         .map(_.filter(Set(2014)))
 
-    filderedCombinedParams.extendedFinData.companyMarketValues shouldBe
+    filteredCombinedParams.extendedFinData.companyMarketValues shouldBe
       combinedNonFilteredWithDerivedParams.extendedFinData.companyMarketValues
         .map(_.filter(Set(2014)))
   }

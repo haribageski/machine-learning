@@ -1,15 +1,14 @@
-package utils
+package model
 
-import model.DateExtended
 import org.joda.time.IllegalFieldValueException
 import org.joda.time.format.DateTimeFormat
 import org.scalatest._
-
-import scala.collection.SortedSet
 import utils.ordered.OrderedSyntax._
 
+import scala.collection.SortedSet
 
-class DateExtendedTest extends FlatSpec with Matchers {
+
+class DateExtendedSpec extends FlatSpec with Matchers {
   val dateExtended1 =  DateExtended("01/01/2016")
   val dateExtended2 =  DateExtended("01/02/2016")
   val dateExtended3 =  DateExtended("02/02/2016")

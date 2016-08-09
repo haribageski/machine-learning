@@ -6,7 +6,7 @@ import model.yearlyFinancialParameters.CompanyYearlyFinDataEntry
 import scala.collection.SortedSet
 import scala.collection.immutable.TreeSet
 
-class YearlyFinDataEntryTest extends FlatSpec with Matchers {
+class YearlyFinDataEntrySpec extends FlatSpec with Matchers {
   "Instance of YearlyFinData " should "be correctly constructed" in {
     val yearlyFinData = CompanyYearlyFinDataEntry("A" , 1000, 2015)
     yearlyFinData.value should be(1000)

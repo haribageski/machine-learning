@@ -8,7 +8,7 @@ import scala.collection.immutable.TreeMap
 import utils.ordered.OrderedSyntax._
 import utils.ordered.OrderedSyntax._
 
-class CompanyYearlyFinDataTest extends FlatSpec with Matchers {
+class CompanyYearlyFinDataSpec extends FlatSpec with Matchers {
   "readCompanyEntries() " should "read all company yearly parameters with bad entries filtered out" in {
     import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader._
     val symbol = "AFCB"

@@ -12,7 +12,7 @@ import utils.readers.ReadableDefaults._
 
 import scala.collection.immutable.TreeSet
 
-class ReadersTest  extends FlatSpec with Matchers {
+class ReadersSpec  extends FlatSpec with Matchers {
   "readColumn()" should "return the columns as List[List[String]], the first list being the list of all lines" in {
     val filePath = "resources/dividends/NOOF.txt"
     val filePath2 = "resources/dividends/wrongFormat.txt"

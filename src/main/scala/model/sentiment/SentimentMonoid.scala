@@ -1,7 +1,6 @@
-package analyzers
+package model.sentiment
 
 import cats.Monoid
-import model.sentiment.Sentiment
 
 object SentimentMonoid extends Monoid[Sentiment] {
   override def empty: Sentiment = Sentiment(0, 0, 0)

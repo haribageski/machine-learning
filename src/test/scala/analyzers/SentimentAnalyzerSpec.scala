@@ -1,10 +1,11 @@
-import analyzers.SentimentAnalyzer
+package analyzers
+
 import model.DateExtended
 import model.dailyNewsParameters.{CompanyAllNews, News}
 import model.sentiment.CompanyNewsSentiment
 import org.scalatest.{FlatSpec, Matchers}
 
-class SentimentAnalyzerTest  extends FlatSpec with Matchers {
+class SentimentAnalyzerSpec  extends FlatSpec with Matchers {
   "evaluateSentiOfAllCompanyNews()" should
     "return cumulative Sentiment" in {
     val symbol: String = "Example"

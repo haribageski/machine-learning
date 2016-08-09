@@ -8,7 +8,7 @@ import utils.ordered.OrderedSyntax._
 import scala.collection.immutable.TreeMap
 
 
-class CompanyYearlyFinParameterTest extends FlatSpec with Matchers {
+class CompanyYearlyFinParameterSpec extends FlatSpec with Matchers {
   "addEntry() " should "update the CompanyYearlyFinParameter by constructing a new CompanyYearlyFinParameter" in {
     val companyYearlyFinParameter1: CompanyYearlyFinParameter = CompanyYearlyFinParameter(
         "A" , null, null, TreeMap.empty[SymYear, CompanyYearlyFinDataEntry], List.empty[CompanyYearlyFinDataEntry]

@@ -82,29 +82,6 @@ object DefaultFilterParameterGivenYears {
     }
   }
 
-  implicit object CompanyDailyFinDataFilterFromConsistentYears extends FilterParameterGivenYears[CompanyDailyFinData] {
-    override def applyFilter(finData: CompanyDailyFinData, consistentYears: Set[Int]): CompanyDailyFinData = {
-      CompanyDailyFinData(
-        finData.symbol,
-        finData.parameterDividends.filter(consistentYears),
-        finData.parameterQuotes.filter(consistentYears),
-        finData.parameterSUEs.filter(consistentYears)
-      )
-    }
-  }
-
-
-  implicit object CompanyYearlyExtendedFinDataFilterFromConsistentYears extends FilterParameterGivenYears[CompanyExtendedFinData] {
-    override def applyFilter(finData: CompanyExtendedFinData, consistentYears: Set[Int]): CompanyExtendedFinData =
-      CompanyExtendedFinData(
-        finData.companyYearlyFinData.filter(consistentYears),
-        finData.companyDailyFinData.filter(consistentYears),
-        finData.companyMarketValues.map(_.filter(consistentYears)),
-        finData.companyBMratio.map(_.filter(consistentYears)),
-        finData.companySize.map(_.filter(consistentYears))
-      )
-  }
-
   implicit object CompanyAllNewsFilter extends FilterParameterGivenYears[CompanyAllNews] {
 
     /**
