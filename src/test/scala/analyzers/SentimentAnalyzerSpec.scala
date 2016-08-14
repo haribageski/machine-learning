@@ -47,6 +47,6 @@ class SentimentAnalyzerSpec  extends FlatSpec with Matchers {
       symbol,
       Map(DateExtended.fromString("18/06/2013") -> sentimentAvgTitle1, DateExtended.fromString("02/03/2014") -> sentimentAvgTitle2),
       Map(DateExtended.fromString("18/06/2013") -> sentimentAvgDescript1, DateExtended.fromString("02/03/2014") -> sentimentAvgDescript2)
-    ) should be (sentimentInOneGo)
+    ) should be(sentimentInOneGo)
   }
 }

@@ -144,11 +144,12 @@ object DefaultFilterData {
       val consistentFinancialData: CompanyExtendedFinData =
         allParameters.extendedFinData.filter
 
+
       val consistentDatesOfFinDataIntersectSentimentDates: Set[DateTime] =
         consistentFinancialData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
-        .intersect(allParameters.newsSentiment.avgSentiPerDateDescript.keySet)
+        .intersect(allParameters.newsSentiment.map(_.avgSentiPerDateDescript.keySet).getOrElse(Set.empty[DateTime]))
 
-      val consistentSentimentData = allParameters.newsSentiment.filter(consistentDatesOfFinDataIntersectSentimentDates)
+      val consistentSentimentData = allParameters.newsSentiment.map(_.filter(consistentDatesOfFinDataIntersectSentimentDates))
 
       val consistentDailyFinData =
         consistentFinancialData.companyDailyFinData.filter(consistentDatesOfFinDataIntersectSentimentDates)

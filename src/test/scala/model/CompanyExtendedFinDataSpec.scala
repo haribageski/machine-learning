@@ -11,19 +11,20 @@ import utils.readers.ReadableDefaults.CompanyDailyFinDataReader
 import utils.readers.ReadableDefaults.CompanyYearlyFinDataReader.readDataFromFile
 
 import scala.collection.immutable.{TreeMap, TreeSet}
+import scalaz.Scalaz._
+import scalaz._
 
 class CompanyExtendedFinDataSpec  extends FlatSpec with Matchers {
 
   val sym = "Example"
-  val companyYearlyExtendedFinData = CompanyExtendedFinData(
-    readDataFromFile(sym),
-    CompanyDailyFinDataReader.readDataFromFile(sym)
-      .filter
-  )
+  val companyYearlyExtendedFinData =
+    (readDataFromFile(sym) |@| CompanyDailyFinDataReader.readDataFromFile(sym)) { (param1, param2) =>
+      CompanyExtendedFinData(param1, param2)
+        .filter
+    }
 
-  val companyExtendedWithDerivedParams: CompanyExtendedFinData =
-    companyYearlyExtendedFinData.deriveAdditionalFinParameters()
-  println("companySize:" + companyExtendedWithDerivedParams.companySize)
+  val companyExtendedWithDerivedParams: Validation[String, CompanyExtendedFinData] =
+    companyYearlyExtendedFinData.map(_.deriveAdditionalFinParameters())
 
   val entry1 = CompanyYearlyFinDataEntry(sym, 100000, 2014)
   val marketVal = CompanyYearlyFinParameter(
@@ -38,25 +39,22 @@ class CompanyExtendedFinDataSpec  extends FlatSpec with Matchers {
     sym, Some(entry3), Some(entry3), TreeMap(SymYear(sym, 2014) -> entry3), List(entry3)
   )
 
-  val companyExtendedFinDataWithAllParams = CompanyExtendedFinData(
-    readDataFromFile(sym),
-    CompanyDailyFinDataReader.readDataFromFile(sym)
-      .filter,
-    Some(marketVal),
-    Some(bMratio),
-    Some(sizeP)
-  )
+  val companyExtendedFinDataWithAllParams =
+    (readDataFromFile(sym) |@| CompanyDailyFinDataReader.readDataFromFile(sym)) {
+      (param1, param2) =>
+        CompanyExtendedFinData(param1, param2, Some(marketVal), Some(bMratio), Some(sizeP))
+    }
 
   "deriveAdditionalFinParameters()" should "derive MarketVal, BMratio, and Size" in {
     //three derived parameters
-    companyExtendedWithDerivedParams.companyBMratio.foreach(_ should be(bMratio))
-    companyExtendedWithDerivedParams.companyMarketValues.foreach(_ should be(marketVal))
-    companyExtendedWithDerivedParams.companySize.foreach(_ should be(sizeP))
+    companyExtendedWithDerivedParams.map(_.companyBMratio.foreach(_ should be(bMratio)))
+    companyExtendedWithDerivedParams.map(_.companyMarketValues.foreach(_ should be(marketVal)))
+    companyExtendedWithDerivedParams.map(_.companySize.foreach(_ should be(sizeP)))
   }
 
 
   "filterInconsistentEntries()" should "filter out inconsistent entries" in {
-    val filtered: CompanyExtendedFinData = companyExtendedWithDerivedParams
+    val filtered: Validation[String, CompanyExtendedFinData] = companyExtendedWithDerivedParams
 
     val divi1 = CompanyDailyFinDataEntry(sym, 0.01, DateExtended.fromString("04/01/2014"))
     val divi2 = CompanyDailyFinDataEntry(sym, 0.02, DateExtended.fromString("04/04/2014"))
@@ -91,11 +89,11 @@ class CompanyExtendedFinDataSpec  extends FlatSpec with Matchers {
       Map(2014 -> TreeSet(sue2, sue1))
     )
 
-    filtered.companyMarketValues.foreach(_ should be(marketVal))
-    filtered.companyBMratio.foreach(_ should be(bMratio))
-    filtered.companySize.foreach(_ should be(sizeP))
-    filtered.companyDailyFinData.parameterDividends should be(dividend)
-    filtered.companyDailyFinData.parameterQuotes should be(quote)
-    filtered.companyDailyFinData.parameterSUEs should be(sue)
+    filtered.map(_.companyMarketValues.foreach(_ should be(marketVal)))
+    filtered.map(_.companyBMratio.foreach(_ should be(bMratio)))
+    filtered.map(_.companySize.foreach(_ should be(sizeP)))
+    filtered.map(_.companyDailyFinData.parameterDividends should be(dividend))
+    filtered.map(_.companyDailyFinData.parameterQuotes should be(quote))
+    filtered.map(_.companyDailyFinData.parameterSUEs should be(sue))
   }
 }

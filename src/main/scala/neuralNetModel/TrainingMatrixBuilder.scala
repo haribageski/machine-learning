@@ -3,8 +3,8 @@ package neuralNetModel
 import model.{CombinedCompanyParameters, SymYear}
 import model.dailyFinancialParameters.CompanyDailyFinDataEntry
 import model.sentiment.Sentiment
-import model.yearlyFinancialParameters.CompanyYearlyFinDataEntry
 import org.joda.time.DateTime
+import scala.collection.parallel.ParMap
 
 object TrainingMatrixBuilder {
   //We expect the input parameter to be filtered out from inconsistent entries
@@ -26,8 +26,8 @@ object TrainingMatrixBuilder {
   //set of rows
   def createMatrixFromDailyParams(company: CombinedCompanyParameters): Set[(List[Double], Double)] = {
     val symbol = company.symbol
-    val newsTitles: Map[DateTime, Sentiment] = company.newsSentiment.avgSentiPerDateTitle
-    val newsDescript: Map[DateTime, Sentiment] = company.newsSentiment.avgSentiPerDateDescript
+    val newsTitles: Map[DateTime, Sentiment] = company.newsSentiment.map(_.avgSentiPerDateTitle).getOrElse(Map.empty)
+    val newsDescript: Map[DateTime, Sentiment] = company.newsSentiment.map(_.avgSentiPerDateDescript).getOrElse(Map.empty)
 
     val sUE: List[CompanyDailyFinDataEntry] =
       company.extendedFinData.companyDailyFinData.parameterSUEs.allCompanyEntriesOfOneDailyParam

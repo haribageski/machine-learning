@@ -1,6 +1,7 @@
 package analyzers
 
 import java.util.Properties
+
 import scala.collection.JavaConverters._
 import edu.stanford.nlp.ling.CoreAnnotations
 import edu.stanford.nlp.pipeline.{Annotation, StanfordCoreNLP}
@@ -37,11 +38,13 @@ object SentimentAnalyzer {
     if (sentences != null && sentences.nonEmpty) {
       sentences.foldLeft(SentimentMonoid.empty)((acc, sentence) => {
         val sentiment: String = sentence.get(classOf[SentimentCoreAnnotations.SentimentClass])
-//        println("Sentiment for :" + sentence.toString() + "is: " + sentiment)
+        println("Sentiment for :" + sentence.toString() + "is: " + sentiment)
         sentiment match {
+          case "Very positive" => acc.copy(pos = acc.pos + 3)
           case "Positive" => acc.copy(pos = acc.pos + 1)
           case "Negative" => acc.copy(neg = acc.neg + 1)
           case "Neutral" => acc.copy(neut = acc.neut + 1)
+          case "Very negative" => acc.copy(neg = acc.neg + 3)
         }
       })
     }
@@ -50,16 +53,17 @@ object SentimentAnalyzer {
   }
 
   def evaluateSentiOfAllCompanyNews(allCompanyNews: CompanyAllNews): CompanyNewsSentiment = {
-    val titlesSentimentWithDate: List[(DateTime, Sentiment)] =
+    val titlesSentimentWithDate: Seq[(DateTime, Sentiment)] =
       allCompanyNews.news.map(news => (news.dateOfNews, evaluateSentiOfText(news.title)))
-    val descriptionsSentimentWithDate: List[(DateTime, Sentiment)] =
+
+    val descriptionsSentimentWithDate: Seq[(DateTime, Sentiment)] =
       allCompanyNews.news.map(news => (news.dateOfNews, evaluateSentiOfText(news.description)))
 
-    val titlesSentisPerDate: Map[DateTime, List[Sentiment]] = titlesSentimentWithDate.groupBy(_._1)
-          .mapValues(_.map(_._2))
+    val titlesSentisPerDate: Map[DateTime, Seq[Sentiment]] = titlesSentimentWithDate.groupBy(_._1)
+      .mapValues(_.map(_._2))
 
-    val descriptionsSentisPerDate: Map[DateTime, List[Sentiment]] = descriptionsSentimentWithDate.groupBy(_._1)
-        .mapValues(_.map(_._2))
+    val descriptionsSentisPerDate: Map[DateTime, Seq[Sentiment]] = descriptionsSentimentWithDate.groupBy(_._1)
+      .mapValues(_.map(_._2))
 
     val avgTitlesSentisPerDate = titlesSentisPerDate.mapValues(findAvgSenti)
     val avgDescriptionsSentisPerDate = descriptionsSentisPerDate.mapValues(findAvgSenti)
@@ -68,10 +72,10 @@ object SentimentAnalyzer {
   }
 
 
-  def findAvgSenti(sentiments: List[Sentiment]): Sentiment = {
+  def findAvgSenti(sentiments: Seq[Sentiment]): Sentiment = {
     val numOfSentiments = sentiments.length
-    val totalSenti =
-      sentiments.foldLeft(SentimentMonoid.empty)(SentimentMonoid.combine)
+    val totalSenti: Sentiment =
+      sentiments.fold(SentimentMonoid.empty)(SentimentMonoid.combine)
 
     val pos = totalSenti.pos match {
       case 0 => 0

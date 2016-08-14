@@ -7,6 +7,9 @@ import model.yearlyFinancialParameters._
 import scala.collection.immutable.TreeMap
 import utils.ordered.OrderedSyntax._
 import utils.ordered.OrderedSyntax._
+import utils.readers.ReadableDefaults.ErrorValidation
+
+import scalaz.Success
 
 class CompanyYearlyFinDataSpec extends FlatSpec with Matchers {
   "readCompanyEntries() " should "read all company yearly parameters with bad entries filtered out" in {
@@ -26,24 +29,9 @@ class CompanyYearlyFinDataSpec extends FlatSpec with Matchers {
         symbol, null, null, TreeMap.empty[SymYear, CompanyYearlyFinDataEntry], List.empty[CompanyYearlyFinDataEntry]
     )
 
-    val companyYearlyFinData: CompanyYearlyFinData =
       CompanyYearlyFinData("AFCB", emptyBookValue, emptyShares, emptyROE, emptyAccrual)
 
-    val inputCompany: CompanyYearlyFinData = readDataFromFile("AFCB")
-
-    /*
-    AFCB	01/12/2005	0	0	0	0
-    AFCB	01/12/2006	0	0	0	0
-    AFCB	01/12/2007	0	0	0	1
-    AFCB	01/12/2008	0	0	0	1
-    AFCB	01/12/2009	0	0	0	1
-    AFCB	01/12/2010	17.8500003814697	3	0.340000003576279	1
-    AFCB	01/12/2011	18.8199996948242	3	0.75	2
-    AFCB	01/12/2012	20.3500003814697	2	1.0900000333786	3
-    AFCB	01/12/2013	21.7399997711182	2	1.12999999523163	2
-    AFCB	01/12/2014	23.6900005340576	2	1.51999998092651	3
-
-     */
+    val inputCompany: ErrorValidation[CompanyYearlyFinData] = readDataFromFile("AFCB")
 
     val inputBookValue = CompanyYearlyFinParameter(
         symbol,
@@ -125,8 +113,6 @@ class CompanyYearlyFinDataSpec extends FlatSpec with Matchers {
           CompanyYearlyFinDataEntry(symbol, 3, 2014)
         )
     )
-    inputCompany should be(CompanyYearlyFinData("AFCB", inputBookValue, inputShares, inputROE, inputAccrual))
+    inputCompany should be(Success(CompanyYearlyFinData("AFCB", inputBookValue, inputShares, inputROE, inputAccrual)))
   }
-
-
 }

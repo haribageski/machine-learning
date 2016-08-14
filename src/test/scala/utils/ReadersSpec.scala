@@ -8,9 +8,10 @@ import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
 import utils.readers.ReadableColumnsDefaults.ColumnsReader
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
-import utils.readers.ReadableDefaults._
+import utils.readers.ReadableDefaults.{ErrorValidation, _}
 
 import scala.collection.immutable.TreeSet
+import scalaz.Success
 
 class ReadersSpec  extends FlatSpec with Matchers {
   "readColumn()" should "return the columns as List[List[String]], the first list being the list of all lines" in {
@@ -18,15 +19,19 @@ class ReadersSpec  extends FlatSpec with Matchers {
     val filePath2 = "resources/dividends/wrongFormat.txt"
 
     ColumnsReader.readColumnsFromFile(filePath) should be(
-    List(
-    List("NOOF", "19/03/2008", "0.125"), List("NOOF", "19/12/2007", "0.125"),
-    List("NOOF", "13/09/2007", "0.125"), List("NOOF", "31/05/2007", "0.125")
-    )
+      Success(
+        List(
+          List("NOOF", "19/03/2008", "0.125"), List("NOOF", "19/12/2007", "0.125"),
+          List("NOOF", "13/09/2007", "0.125"), List("NOOF", "31/05/2007", "0.125")
+        )
+      )
     )
     ColumnsReader.readColumnsFromFile(filePath2) should be(
-    List(
-    List("A", "27/03/2015", "0.1")
-    )
+      Success(
+        List(
+          List("A", "27/03/2015", "0.1")
+        )
+      )
     )
     //    ColumnsReader.readColumnsFromFile(filePath2 + "2") should be (
     //      List(
@@ -54,7 +59,7 @@ class ReadersSpec  extends FlatSpec with Matchers {
     val earliestD = CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended.fromString("19/03/2008"))
     val oldestD = CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended.fromString("31/05/2007"))
 
-    val dividendsRead: CompanyDailyFinParameter = CompanyDailyFinParameterReader.readDividendFromFile("NOOF")
+    val dividendsRead: ErrorValidation[CompanyDailyFinParameter] = CompanyDailyFinParameterReader.readDividendFromFile("NOOF")
     val toComp = CompanyDailyFinParameter(sym, Some(oldestD), Some(earliestD), dividends,
       Map(2007 -> TreeSet(
         CompanyDailyFinDataEntry("NOOF", 0.125, DateExtended.fromString("31/05/2007")),
@@ -66,7 +71,7 @@ class ReadersSpec  extends FlatSpec with Matchers {
         )
       )
     )
-    dividendsRead == toComp should be(true)
+    dividendsRead.map(_ == toComp should be(true))
   }
 
 
@@ -85,7 +90,7 @@ class ReadersSpec  extends FlatSpec with Matchers {
     val earliestS = CompanyDailyFinDataEntry("NOOF", -80, DateExtended.fromString("04/02/2011"))
     val oldestS = CompanyDailyFinDataEntry("NOOF", 85.7099990844727, DateExtended.fromString("10/06/2010"))
 
-    val suesRead = CompanyDailyFinParameterReader.readEarningSurpriseFromFile("NOOF")
+    val suesRead: ErrorValidation[CompanyDailyFinParameter] = CompanyDailyFinParameterReader.readEarningSurpriseFromFile("NOOF")
     val toComp = CompanyDailyFinParameter(sym, Some(oldestS), Some(earliestS), sues,
       Map(2010 -> TreeSet(
         CompanyDailyFinDataEntry("NOOF", 85.7099990844727, DateExtended.fromString("10/06/2010")),
@@ -96,7 +101,7 @@ class ReadersSpec  extends FlatSpec with Matchers {
           CompanyDailyFinDataEntry("NOOF", -80, DateExtended.fromString("04/02/2011"))
         ))
     )
-    suesRead == toComp should be(true)
+    suesRead.map(_ == toComp should be(true))
   }
 
 
@@ -117,7 +122,7 @@ class ReadersSpec  extends FlatSpec with Matchers {
     val oldestQ = CompanyDailyFinDataEntry("test", 2.01, DateExtended.fromString("22/11/2012"))
     val earliestQ = CompanyDailyFinDataEntry("test", 2.02, DateExtended.fromString("28/11/2012"))
 
-    val quotesRead: CompanyDailyFinParameter = CompanyDailyFinParameterReader.readQuotesFromFile("test")
+    val quotesRead: ErrorValidation[CompanyDailyFinParameter] = CompanyDailyFinParameterReader.readQuotesFromFile("test")
 
     val toComp = CompanyDailyFinParameter(sym, Some(oldestQ), Some(earliestQ), quotes,
       Map(2012 -> TreeSet(
@@ -128,25 +133,25 @@ class ReadersSpec  extends FlatSpec with Matchers {
         CompanyDailyFinDataEntry("test", 2.02, DateExtended.fromString("28/11/2012"))
       ))
     )
-    quotesRead == toComp should be(true)
+    quotesRead.map(_ == toComp should be(true))
   }
 
 
   "CompanyNewsReader.readDataFromFile() " should "read all Company News in expected format" in {
     val sym = "Example"
-    val newsRead: CompanyAllNews = CompanyNewsReader.readDataFromFile(sym)
-    newsRead.news(2) should be(
+    val newsRead: ErrorValidation[CompanyAllNews] = CompanyNewsReader.readDataFromFile(sym)
+    newsRead.map(_.news(2) should be(
       News(sym, DateExtended.fromString("18/06/2013"), 2013, "Agilent Technologies Inc Announces Offering of Senior Notes",
         "Agilent Technologies Inc Announces Offering of Senior Notes Reuters Key Development - Jun 18, 2013")
-    )
+    ))
 
-    newsRead.news(0) should be(
+    newsRead.map(_.news(0) should be(
       News(sym, DateExtended.fromString("04/04/2014"), 2014, "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8%",
         "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8% Wall Street Pulse - Mar 2, 2015 Agilent Technologies, Inc. (NYSE:A) reported a rise of 132,877 shares or 5.8% in the short interest. The remaining shorts are 0.7% of the total floated shares.Share Price of Agilent Technologies, Inc. Rally 0.62% - Ashburn DailyAgilent Technologies Receives &quot;A-&quot; Credit Rating from Morningstar (A) - sleekmoney")
-    )
-    newsRead.news(1) should be(
+    ))
+    newsRead.map(_.news(1) should be(
       News(sym, DateExtended.fromString("01/04/2014"), 2014, "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8%",
         "Update: Agilent Technologies, Inc. Short Interest Grows by 5.8% Wall Street Pulse - Mar 2, 2015 Agilent Technologies, Inc. (NYSE:A) reported a rise of 132,877 shares or 5.8% in the short interest. The remaining shorts are 0.7% of the total floated shares.Share Price of Agilent Technologies, Inc. Rally 0.62% - Ashburn DailyAgilent Technologies Receives &quot;A-&quot; Credit Rating from Morningstar (A) - sleekmoney")
-    )
+    ))
   }
 }

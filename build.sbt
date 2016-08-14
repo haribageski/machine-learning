@@ -20,7 +20,8 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats" % "0.4.0",
   "com.github.pathikrit" %% "better-files" % betterFilesVersion,
   "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0",
-  "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0" classifier "models"
+  "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0" classifier "models",
+  "org.scalaz" %% "scalaz-core" % "7.1.3"
 ).map(_.exclude("ch.qos.logback", "logback-classic"))
 
 scalacOptions in ThisBuild ++= Seq(
