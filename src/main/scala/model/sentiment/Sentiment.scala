@@ -1,5 +1,3 @@
 package model.sentiment
 
-import cats.Monoid
-
-case class Sentiment(pos: Double, neg: Double, neut: Double)
+case class Sentiment(veryPos: Double, pos: Double, neut: Double, neg: Double, veryNeg: Double)

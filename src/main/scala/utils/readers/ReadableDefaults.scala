@@ -182,10 +182,10 @@ object ReadableDefaults {
       val filePath = dirPath + "google_news_" + symbol + ".txt"
 
       val inputDataFromFileE: Validation[String, List[List[String]]] = ColumnsReader.readColumnsFromFile(filePath)
-      val allCompanyNewsE: Validation[String, List[News]] = inputDataFromFileE.map(_.map { line =>
+      val allCompanyNewsE: Validation[String, Stream[News]] = inputDataFromFileE.map(_.map { line =>
         val date = DateExtended(line(1))
         News(symbol, date.dateExtended, date.dateExtended.getYear, line(2), line(3))
-      })
+      }.toStream)
       allCompanyNewsE.map(CompanyAllNews(symbol, _))
     }
 
@@ -212,17 +212,17 @@ object ReadableDefaults {
 
   implicit object CombinedCompanyParametersReader extends Readable[CombinedCompanyParameters] {
     override def readDataFromFile(sym: String): Validation[String, CombinedCompanyParameters] = {
-      lazy val allCompanyNews = CompanyNewsReader.readDataFromFile(sym)
+//      lazy val allCompanyNews = CompanyNewsReader.readDataFromFile(sym)
       lazy val companyYearly = CompanyYearlyFinDataReader.readDataFromFile(sym)
       lazy val companyDaily = CompanyDailyFinDataReader.readDataFromFile(sym)
 
-      (allCompanyNews |@| companyYearly |@| companyDaily) {
-        (param1, param2, param3) =>
+      (companyYearly |@| companyDaily) {
+        (param1, param2) =>
         CombinedCompanyParameters(
           sym,
           CompanyExtendedFinData(
-            param2,
-            param3
+            param1,
+            param2
           ),
           None
         )

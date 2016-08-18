@@ -9,3 +9,6 @@ In order to send coverage to codacy run:
 If the last command doesn't work, then run:
 `sh ./sbt-codacy-coverage-uploader.sh`
 
+
+How to specify JVM maximum heap size "-Xmx"
+`sbt -mem 2048` 

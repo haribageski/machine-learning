@@ -8,11 +8,13 @@ import filters.FilterSyntax.FilterOps
 import model.dailyNewsParameters.CompanyAllNews
 import model.CombinedCompanyParameters
 import neuralNetModel.TrainingMatrixBuilder._
+import org.scalatest.concurrent.ScalaFutures
+
 import scalaz._
 import scalaz.Scalaz._
 
-class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers {
-  val processors: Int =  Runtime.getRuntime.availableProcessors
+class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFutures {
+  val processors: Int = Runtime.getRuntime.availableProcessors
 
   "createMatrix()" should "return a tuple of set of rows, each row being a list, and set of results - Quote values" in {
     val symbol = "Example"
@@ -33,22 +35,22 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers {
     println("HEAD:" + symbols.head)
     println("symbols size in CombinedCompanyParametersReader:" + CombinedCompanyParametersReader.getNamesOfFiles().size)
 
-    lazy val allCompaniesParams: Seq[Validation[String, CombinedCompanyParameters]] = symbols.take(1).map {
+    lazy val allCompaniesParams: Vector[Validation[String, CombinedCompanyParameters]] = symbols.take(8).map {
       fileName =>
         println("file to read: " + fileName)
         CombinedCompanyParametersReader.readDataFromFile(fileName)
-    }
+    }.toVector
 
-    val allNews: Seq[Validation[String, CompanyAllNews]] =
-      symbols.take(1).map {
+    val allNews: Vector[ErrorValidation[CompanyAllNews]] =
+      symbols.take(8).map {
         fileName => CompanyNewsReader.readDataFromFile(fileName)
-      }
+      }.toVector
 
-    val allCombinedSeqOfValidat: Seq[Validation[String, CombinedCompanyParameters]] = {
+    val allCombinedSeqOfValidat: Vector[Validation[String, CombinedCompanyParameters]] = {
       allCompaniesParams.zip(allNews)
-        .grouped((allCompaniesParams.size.toDouble / processors).toInt + 1).toSeq //group of jobs to be processed in parallel
+        .grouped((allCompaniesParams.size.toDouble / processors).toInt + 1).toSeq.par //group of jobs to be processed in parallel
         .map {
-        x => x.map {
+        group => group.map {
           validatAllParamsWithNews =>
             (validatAllParamsWithNews._1 |@| validatAllParamsWithNews._2) {
               (allParams, news) =>
@@ -56,20 +58,21 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers {
                 allParams.copy(newsSentiment = Some(senti))
             }
         }
-      }.fold(Seq.empty)((seq1, seq2) => seq1 ++ seq2)
+      }.fold(Vector.empty[Validation[String, CombinedCompanyParameters]])((vector1, vector2) => vector1 ++ vector2)
     }
+    println("allCombinedSeqOfValidat size:" + allCombinedSeqOfValidat.size)
 
-    val allCombinedSeq: Seq[CombinedCompanyParameters] =
-      allCombinedSeqOfValidat.foldLeft(Seq.empty[CombinedCompanyParameters])((acc, validat) => {
-        validat match {
+
+    val allCombinedSeq: Vector[CombinedCompanyParameters] = {
+      allCombinedSeqOfValidat.par.aggregate(Vector.empty[CombinedCompanyParameters])((acc, validate) => {
+        validate match {
           case Success(a: CombinedCompanyParameters) => a +: acc
           case Failure(e) =>
             println(e)
             acc
         }
-      })
-
-
+      }, (vector1, vector2) => vector1 ++ vector2)
+    }
     println("AllCompaniesSize:" + allCombinedSeq.size)
     val x = createMatrix(allCombinedSeq.toList)
     1 should be(1)

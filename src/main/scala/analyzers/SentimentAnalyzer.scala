@@ -10,6 +10,7 @@ import edu.stanford.nlp.util.CoreMap
 import model.sentiment._
 import model.dailyNewsParameters.CompanyAllNews
 import org.joda.time.DateTime
+import utils.Utils
 
 
 object SentimentAnalyzer {
@@ -33,62 +34,67 @@ object SentimentAnalyzer {
 
     // An Annotation is a Map and you can get and use the various analyses individually.
     // For instance, get the parse tree of the first sentence in the text.
-    val sentences: List[CoreMap] = annotation.get(classOf[CoreAnnotations.SentencesAnnotation]).asScala.toList
+    val sentences: Seq[CoreMap] = annotation.get(classOf[CoreAnnotations.SentencesAnnotation]).asScala
 
     if (sentences != null && sentences.nonEmpty) {
-      sentences.foldLeft(SentimentMonoid.empty)((acc, sentence) => {
-        val sentiment: String = sentence.get(classOf[SentimentCoreAnnotations.SentimentClass])
-        println("Sentiment for :" + sentence.toString() + "is: " + sentiment)
+      sentences.map(coreMap => {
+        val sentiment: String = coreMap.get(classOf[SentimentCoreAnnotations.SentimentClass])
+        println("Sentiment for :" + coreMap.toString() + "is: " + sentiment)
         sentiment match {
-          case "Very positive" => acc.copy(pos = acc.pos + 3)
-          case "Positive" => acc.copy(pos = acc.pos + 1)
-          case "Negative" => acc.copy(neg = acc.neg + 1)
-          case "Neutral" => acc.copy(neut = acc.neut + 1)
-          case "Very negative" => acc.copy(neg = acc.neg + 3)
+          case "Very positive" => Sentiment(1, 0, 0, 0, 0)
+          case "Positive" => Sentiment(0, 1, 0, 0, 0)
+          case "Neutral" => Sentiment(0, 0, 1, 0, 0)
+          case "Negative" => Sentiment(0, 0, 0, 1, 0)
+          case "Very negative" => Sentiment(0, 0, 0, 0, 1)
         }
-      })
+      }).fold(SentimentMonoid.empty)(SentimentMonoid.combine)
     }
     else
       SentimentMonoid.empty
   }
 
   def evaluateSentiOfAllCompanyNews(allCompanyNews: CompanyAllNews): CompanyNewsSentiment = {
-    val titlesSentimentWithDate: Seq[(DateTime, Sentiment)] =
+    val titlesSentimentWithDate: Stream[(DateTime, Sentiment)] =
       allCompanyNews.news.map(news => (news.dateOfNews, evaluateSentiOfText(news.title)))
 
-    val descriptionsSentimentWithDate: Seq[(DateTime, Sentiment)] =
+    val descriptionsSentimentWithDate: Stream[(DateTime, Sentiment)] =
       allCompanyNews.news.map(news => (news.dateOfNews, evaluateSentiOfText(news.description)))
 
-    val titlesSentisPerDate: Map[DateTime, Seq[Sentiment]] = titlesSentimentWithDate.groupBy(_._1)
+    val titlesSentisPerDate: Map[DateTime, Stream[Sentiment]] = titlesSentimentWithDate.groupBy(_._1)
       .mapValues(_.map(_._2))
 
-    val descriptionsSentisPerDate: Map[DateTime, Seq[Sentiment]] = descriptionsSentimentWithDate.groupBy(_._1)
+    val descriptionsSentisPerDate: Map[DateTime, Stream[Sentiment]] = descriptionsSentimentWithDate.groupBy(_._1)
       .mapValues(_.map(_._2))
 
-    val avgTitlesSentisPerDate = titlesSentisPerDate.mapValues(findAvgSenti)
-    val avgDescriptionsSentisPerDate = descriptionsSentisPerDate.mapValues(findAvgSenti)
+    val avgTitlesSentisPerDate: Map[DateTime, Sentiment] = titlesSentisPerDate.mapValues(findAvgSenti)
+    val avgDescriptionsSentisPerDate: Map[DateTime, Sentiment] = descriptionsSentisPerDate.mapValues(findAvgSenti)
 
     CompanyNewsSentiment(allCompanyNews.symbol, avgTitlesSentisPerDate, avgDescriptionsSentisPerDate)
   }
 
 
-  def findAvgSenti(sentiments: Seq[Sentiment]): Sentiment = {
-    val numOfSentiments = sentiments.length
-    val totalSenti: Sentiment =
-      sentiments.fold(SentimentMonoid.empty)(SentimentMonoid.combine)
+  def findAvgSenti(sentiments: Stream[Sentiment]): Sentiment = {
 
-    val pos = totalSenti.pos match {
-      case 0 => 0
-      case x => x / numOfSentiments
+    val numOfSentiments = sentiments.length.toDouble
+
+    def findAvg: Double => Double = {
+      (totalSenti: Double) => totalSenti match {
+        case 0 => 0
+        case x: Double => x / numOfSentiments
+      }
     }
-    val neg = totalSenti.neg match {
-      case 0 => 0
-      case x => x / numOfSentiments
-    }
-    val neut = totalSenti.neut match {
-      case 0 => 0
-      case x => x / numOfSentiments
-    }
-    Sentiment(pos, neg, neut)
+
+    def combine(x: Sentiment, acc: => Sentiment): Sentiment = SentimentMonoid.combine(x, acc)
+    val totalSenti: Sentiment =
+      Utils.foldr(combine, SentimentMonoid.empty)(sentiments)
+//      sentiments.fold(SentimentMonoid.empty)(SentimentMonoid.combine)
+
+    val veryPos = findAvg(totalSenti.veryPos)
+    val pos = findAvg(totalSenti.pos)
+    val neut = findAvg(totalSenti.neut)
+    val neg = findAvg(totalSenti.neg)
+    val veryNeg = findAvg(totalSenti.veryNeg)
+
+    Sentiment(veryPos, pos, neut, neg, veryNeg)
   }
 }

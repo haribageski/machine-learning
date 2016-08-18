@@ -4,6 +4,18 @@ name := "onlineNewsMachineLearning"
 
 version := "1.0"
 
+javaOptions += "-Xmx2G"
+
+// increase the time between polling for file changes when using continuous execution
+pollInterval := 1000
+
+// append several options to the list of options passed to the Java compiler
+javacOptions ++= Seq("-source", "2", "-target", "2")
+
+// add a JVM option to use when forking a JVM for 'run'
+javaOptions += "-Xmx2G"
+
+
 scalaVersion := "2.11.7"
 
 scapegoatVersion := "1.1.0"
@@ -32,6 +44,7 @@ scalacOptions in ThisBuild ++= Seq(
   "-unchecked", // additional warnings where generated code depends on assumptions
   "-Xlint" // recommended additional warnings
 )
+
 
 fork in run := true
 connectInput in run := true   // this is needed because by default, the standard input of the sbt process is not forwarded to the forked process

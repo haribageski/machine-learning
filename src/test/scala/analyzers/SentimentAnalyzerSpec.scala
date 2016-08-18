@@ -23,23 +23,23 @@ class SentimentAnalyzerSpec  extends FlatSpec with Matchers {
     )
     val companyAllNews = CompanyAllNews(
       symbol,
-      List(news1, news2, news3)
+      Stream(news1, news2, news3)
     )
 
     val sentimentInOneGo: CompanyNewsSentiment = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(companyAllNews)
 
-    val sentimentAvgTitle1 = SentimentAnalyzer.findAvgSenti(List(
+    val sentimentAvgTitle1 = SentimentAnalyzer.findAvgSenti(Stream(
       SentimentAnalyzer.evaluateSentiOfText(news1.title),
       SentimentAnalyzer.evaluateSentiOfText(news2.title)
     ))
-    val sentimentAvgTitle2 = SentimentAnalyzer.findAvgSenti(List(
+    val sentimentAvgTitle2 = SentimentAnalyzer.findAvgSenti(Stream(
       SentimentAnalyzer.evaluateSentiOfText(news3.title)
     ))
-    val sentimentAvgDescript1 = SentimentAnalyzer.findAvgSenti(List(
+    val sentimentAvgDescript1 = SentimentAnalyzer.findAvgSenti(Stream(
       SentimentAnalyzer.evaluateSentiOfText(news1.description),
       SentimentAnalyzer.evaluateSentiOfText(news2.description)
     ))
-    val sentimentAvgDescript2 = SentimentAnalyzer.findAvgSenti(List(
+    val sentimentAvgDescript2 = SentimentAnalyzer.findAvgSenti(Stream(
       SentimentAnalyzer.evaluateSentiOfText(news3.description)
     ))
 

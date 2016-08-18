@@ -96,11 +96,11 @@ class FiltersSpec extends FlatSpec with Matchers {
     )
     val companyAllNews = CompanyAllNews(
       "A",
-      List(news1, news2)
+      Stream(news1, news2)
     )
     companyAllNews.filter(Set(2014)).news should be(List(news2))
     companyAllNews.filter(Set(2015)).news should be(List(news1))
-    companyAllNews.filter(Set.empty[Int]) should be(CompanyAllNews("A", Nil))
+    companyAllNews.filter(Set.empty[Int]) should be(CompanyAllNews("A", Stream.empty))
     companyAllNews.filter(Set(2014, 2015)) should be(companyAllNews)
   }
 
@@ -176,15 +176,9 @@ class FiltersSpec extends FlatSpec with Matchers {
     val combinedCompanyParametersFiltered: Validation[String, CombinedCompanyParameters] =
       combinedCompanyParameters.map(_.filter)
 
-    (combinedCompanyParametersFiltered.map(_.newsSentiment) |@| sentimentInOneGo.map(Option(_))) {
-      (param1, param2) => param1 should be(param2.filter(
-          extendedFinData.companyDailyFinData.parameterSUEs.allCompanyEntriesOfOneDailyParam.map(_.date).toSet))
-    }
-
-    //      param1.extendedFinData should be {
-    //        extendedFinData.filter
-    //            param2.avgSentiPerDateDescript.keySet)
-    //      }
+    combinedCompanyParametersFiltered.map(_.extendedFinData should be(
+      extendedFinData.filter)
+    )
   }
 
 
