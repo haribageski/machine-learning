@@ -3,6 +3,7 @@ package filters
 import analyzers.SentimentAnalyzer
 import filters.DefaultFilterData._
 import filters.DefaultFilterParameterGivenYears._
+import filters.DefaultFilterParameterGivenDates._
 import filters.FilterSyntax.FilterOps
 import model.{CombinedCompanyParameters, DateExtended}
 import model.DateExtended._
@@ -12,8 +13,9 @@ import model.sentiment.CompanyNewsSentiment
 import model.yearlyFinancialParameters.{CompanyExtendedFinData, CompanyYearlyFinData, CompanyYearlyFinDataEntry, CompanyYearlyFinParameter}
 import org.scalatest.{FlatSpec, Matchers}
 import utils.ordered.OrderedSyntax._
-import utils.readers.ReadableDefaults.{CompanyNewsReader, ErrorValidation}
+import utils.readers.ReadableDefaults.{CombinedCompanyParametersReader, CompanyDailyFinDataReader, CompanyNewsReader, ErrorValidation}
 import utils.readers.ReadableParameterDefaults.CompanyDailyFinParameterReader
+
 import scalaz.Scalaz._
 import scalaz._
 import scala.collection.immutable.TreeSet
@@ -181,56 +183,56 @@ class FiltersSpec extends FlatSpec with Matchers {
     )
   }
 
+  pending
+  "CombinedCompanyParametersFilter.filter()" should
+    "return CombinedCompanyParametersFilter that contains only consistent in year entries" in {
+    val symbol = "Example"
+    val combinedNonFiltered = CombinedCompanyParametersReader.readDataFromFile(symbol)
+    val combinedNonFilteredWithDerivedParams = combinedNonFiltered.map { notFiltered => notFiltered.copy(extendedFinData =
+      notFiltered.extendedFinData.deriveAdditionalFinParameters)
+    }
+    val filteredCombinedParams = combinedNonFiltered.map(_.filter)
 
-//  "CombinedCompanyParametersFilter.filter()" should
-//    "return CombinedCompanyParametersFilter that contains only consistent in year entries" in {
-//    val symbol = "Example"
-//    val combinedNonFiltered = CombinedCompanyParametersReader.readDataFromFile(symbol)
-//    val combinedNonFilteredWithDerivedParams = combinedNonFiltered.map { notFiltered => notFiltered.copy(extendedFinData =
-//      notFiltered.extendedFinData.deriveAdditionalFinParameters)
-//    }
-//    val filteredCombinedParams = combinedNonFiltered.map(_.filter)
-//
-//    (filteredCombinedParams |@| CompanyDailyFinDataReader.readDataFromFile(symbol)) { (param1, param2) =>
-//      param1.extendedFinData.companyDailyFinData.parameterDividends shouldBe {
-//        param2.filter(Set(fromString("04/04/2014"))).parameterDividends
-//      }
-//    }
-//    (filteredCombinedParams |@| CompanyDailyFinDataReader.readDataFromFile(symbol)) { (param1, param2) =>
-//      param1.extendedFinData.companyDailyFinData.parameterSUEs shouldBe {
-//        param2.filter(Set(fromString("04/04/2014"))).parameterSUEs
-//      }
-//    }
-//    pending
-//    (filteredCombinedParams |@| CompanyDailyFinDataReader.readDataFromFile(symbol)) { (param1, param2: CompanyDailyFinData) =>
-//      param1.extendedFinData.companyDailyFinData.parameterQuotes shouldBe
-//        param2.filter(Set(fromString("05/04/2014"), fromString("04/04/2014")))
-//    }
-//    (filteredCombinedParams |@| combinedNonFilteredWithDerivedParams) { (param1, param2) =>
-//      param1.extendedFinData.companyYearlyFinData shouldBe
-//        param2.extendedFinData.companyYearlyFinData
-//          .filter(Set(2014))
-//    }
-//    (filteredCombinedParams |@| combinedNonFilteredWithDerivedParams) { (param1, param2) =>
-//      param1.newsSentiment shouldBe
-//        param2.newsSentiment.map {
-//          _.filter(Set(fromString("04/04/2014")))
-//        }
-//    }
-//    (filteredCombinedParams |@| combinedNonFilteredWithDerivedParams) { (param1, param2) =>
-//      param1.extendedFinData.companyBMratio shouldBe
-//        param2.extendedFinData.companyBMratio
-//          .map(_.filter(Set(2014)))
-//    }
-//    (filteredCombinedParams |@| combinedNonFilteredWithDerivedParams) { (param1, param2) =>
-//      param1.extendedFinData.companySize shouldBe
-//        param2.extendedFinData.companySize
-//          .map(_.filter(Set(2014)))
-//    }
-//    (filteredCombinedParams |@| combinedNonFilteredWithDerivedParams) { (param1, param2) =>
-//      param1.extendedFinData.companyMarketValues shouldBe
-//        param2.extendedFinData.companyMarketValues
-//          .map(_.filter(Set(2014)))
-//    }
-//  }
+    (filteredCombinedParams |@| CompanyDailyFinDataReader.readDataFromFile(symbol)) { (param1, param2) =>
+      param1.extendedFinData.companyDailyFinData.parameterDividends shouldBe {
+        param2.filter(Set(fromString("04/04/2014"))).parameterDividends
+      }
+    }
+    (filteredCombinedParams |@| CompanyDailyFinDataReader.readDataFromFile(symbol)) { (param1, param2) =>
+      param1.extendedFinData.companyDailyFinData.parameterSUEs shouldBe {
+        param2.filter(Set(fromString("04/04/2014"))).parameterSUEs
+      }
+    }
+    pending
+    (filteredCombinedParams |@| CompanyDailyFinDataReader.readDataFromFile(symbol)) { (param1, param2: CompanyDailyFinData) =>
+      param1.extendedFinData.companyDailyFinData.parameterQuotes shouldBe
+        param2.filter(Set(fromString("05/04/2014"), fromString("04/04/2014")))
+    }
+    (filteredCombinedParams |@| combinedNonFilteredWithDerivedParams) { (param1, param2) =>
+      param1.extendedFinData.companyYearlyFinData shouldBe
+        param2.extendedFinData.companyYearlyFinData
+          .filter(Set(2014))
+    }
+    (filteredCombinedParams |@| combinedNonFilteredWithDerivedParams) { (param1, param2) =>
+      param1.newsSentiment shouldBe
+        param2.newsSentiment.map {
+          _.filter(Set(fromString("04/04/2014")))
+        }
+    }
+    (filteredCombinedParams |@| combinedNonFilteredWithDerivedParams) { (param1, param2) =>
+      param1.extendedFinData.companyBMratio shouldBe
+        param2.extendedFinData.companyBMratio
+          .map(_.filter(Set(2014)))
+    }
+    (filteredCombinedParams |@| combinedNonFilteredWithDerivedParams) { (param1, param2) =>
+      param1.extendedFinData.companySize shouldBe
+        param2.extendedFinData.companySize
+          .map(_.filter(Set(2014)))
+    }
+    (filteredCombinedParams |@| combinedNonFilteredWithDerivedParams) { (param1, param2) =>
+      param1.extendedFinData.companyMarketValues shouldBe
+        param2.extendedFinData.companyMarketValues
+          .map(_.filter(Set(2014)))
+    }
+  }
 }

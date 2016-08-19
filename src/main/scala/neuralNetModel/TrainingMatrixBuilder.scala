@@ -45,18 +45,23 @@ object TrainingMatrixBuilder {
     val quotes: List[CompanyDailyFinDataEntry] =
       company.extendedFinData.companyDailyFinData.parameterQuotes.allCompanyEntriesOfOneDailyParam
     val mapQuotes: Map[DateTime, Double] =
-      quotes.foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
-        .filter(dateWithVal => mapDividends.keySet.contains(dateWithVal._1))
+      quotes.filter(dateWithVal => mapDividends.keySet.contains(dateWithVal.date))
+      .foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
+
 
     val resultQuotesMap: Map[DateTime, Double] =
-      quotes.foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
-        .filter(dateWithVal => mapQuotes.contains(dateWithVal._1.minusDays(1)))
+      quotes.filter(dateWithVal => mapDividends.keySet.map(_.plusDays(1)).contains(dateWithVal.date))
+        .foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
 
+    println("mapQuotes:" + mapQuotes.map(_._1))
     mapSUE.keySet.map(dateTime =>
-      (List(mapDividends(dateTime), mapSUE(dateTime), mapQuotes(dateTime),
-        newsTitles(dateTime).neut, newsTitles(dateTime).neg, newsTitles(dateTime).pos,
-        newsDescript(dateTime).neut, newsDescript(dateTime).neg, newsDescript(dateTime).pos),
-        resultQuotesMap(dateTime.plusDays(1)))
+      (List(
+        mapDividends(dateTime),
+        mapSUE(dateTime),
+        mapQuotes(dateTime),
+        newsTitles(dateTime).pos, newsTitles(dateTime).veryPos, newsTitles(dateTime).neut, newsTitles(dateTime).neg, newsTitles(dateTime).veryNeg,
+        newsDescript(dateTime).pos, newsDescript(dateTime).veryPos, newsDescript(dateTime).neut, newsDescript(dateTime).neg, newsDescript(dateTime).veryNeg
+      ), resultQuotesMap(dateTime.plusDays(1)))
     )
   }
 

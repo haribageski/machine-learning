@@ -34,7 +34,7 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
     println("HEAD:" + symbols.head)
     println("symbols size in CombinedCompanyParametersReader:" + CombinedCompanyParametersReader.getNamesOfFiles().size)
 
-    lazy val allCompaniesParams: Vector[Validation[String, CombinedCompanyParameters]] = symbols.take(10).map {
+    lazy val allCompaniesParams: Vector[Validation[String, CombinedCompanyParameters]] = symbols.take(1).map {
       fileName =>
         println("file to read: " + fileName)
         val combinedNonFiltered: Validation[String, CombinedCompanyParameters] = CombinedCompanyParametersReader.readDataFromFile(fileName)
@@ -45,7 +45,7 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
     }.toVector
 
     val allNews: Vector[ErrorValidation[CompanyAllNews]] =
-      symbols.take(10).map {
+      symbols.take(1).map {
         fileName => CompanyNewsReader.readDataFromFile(fileName)
       }.toVector
 
@@ -62,15 +62,15 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
                   .filter
                 val newsFiltered: Stream[News] = news.news.filter(
                     allParamsFilteredNoSentiment.extendedFinData.companyDailyFinData.parameterSUEs.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
-                        .contains(_)
+                      .contains(_)
                 )
                 val senti = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(news.copy(news = newsFiltered))
-                allParams.copy(newsSentiment = Some(senti))   //now we have the final Combined parameters
+                allParams.copy(newsSentiment = Some(senti))
+                    .filter     //now we have the final Combined parameters
             }
         }
       }.fold(Vector.empty[Validation[String, CombinedCompanyParameters]])((vector1, vector2) => vector1 ++ vector2)
     }
-    println("allCombinedSeqOfValidat size:" + allCombinedSeqOfValidat.size)
 
 
     val allCombinedSeq: Vector[CombinedCompanyParameters] = {
@@ -83,9 +83,8 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
         }
       }, (vector1, vector2) => vector1 ++ vector2)
     }
-    println("AllCompaniesSize:" + allCombinedSeq.size)
     val x = createMatrix(allCombinedSeq.toList)
-    1 should be(1)
     println("X size:" + x._1.size)
+    1 should be(1)
   }
 }
