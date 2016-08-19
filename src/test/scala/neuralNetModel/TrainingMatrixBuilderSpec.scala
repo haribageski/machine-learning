@@ -29,20 +29,22 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
     1 should be(1)
 
 
-
-
     val symbols = CombinedCompanyParametersReader.getNamesOfFiles().toSeq
     println("HEAD:" + symbols.head)
     println("symbols size in CombinedCompanyParametersReader:" + CombinedCompanyParametersReader.getNamesOfFiles().size)
 
-    lazy val allCompaniesParams: Vector[Validation[String, CombinedCompanyParameters]] = symbols.take(8).map {
+    lazy val allCompaniesParams: Vector[Validation[String, CombinedCompanyParameters]] = symbols.take(1).map {
       fileName =>
         println("file to read: " + fileName)
-        CombinedCompanyParametersReader.readDataFromFile(fileName)
+        val combinedNonFiltered = CombinedCompanyParametersReader.readDataFromFile(fileName)
+        val combinedNonFilteredWithDerivedParams = combinedNonFiltered.map { notFiltered => notFiltered.copy(extendedFinData =
+          notFiltered.extendedFinData.deriveAdditionalFinParameters)
+        }
+        combinedNonFilteredWithDerivedParams
     }.toVector
 
     val allNews: Vector[ErrorValidation[CompanyAllNews]] =
-      symbols.take(8).map {
+      symbols.take(1).map {
         fileName => CompanyNewsReader.readDataFromFile(fileName)
       }.toVector
 
@@ -56,6 +58,7 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
               (allParams, news) =>
                 val senti = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(news)
                 allParams.copy(newsSentiment = Some(senti))
+                  .filter   //now we have the final Combined parameters
             }
         }
       }.fold(Vector.empty[Validation[String, CombinedCompanyParameters]])((vector1, vector2) => vector1 ++ vector2)
