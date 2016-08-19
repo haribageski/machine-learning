@@ -145,9 +145,6 @@ object DefaultFilterData {
       val consistentFinancialData: CompanyExtendedFinData =
         allParameters.extendedFinData.filter
 
-      println("companyDailyFinData:" + consistentFinancialData.companyDailyFinData)
-      println("companyYearlyFinData:" + consistentFinancialData.companyYearlyFinData)
-
       val consistentDatesOfFinDataIntersectSentimentDates: Set[DateTime] =
         allParameters.newsSentiment match {
           case None => consistentFinancialData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
@@ -155,19 +152,13 @@ object DefaultFilterData {
             consistentFinancialData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
               .intersect(allParameters.newsSentiment.map(_.avgSentiPerDateDescript.keySet).getOrElse(Set.empty[DateTime]))
         }
-      println("consistentDatesOfFinDataIntersectSentimentDates:" +  consistentDatesOfFinDataIntersectSentimentDates)
-
       val consistentSentimentData = allParameters.newsSentiment.map(_.filter(consistentDatesOfFinDataIntersectSentimentDates))
-      println("consistentSentimentData:" + consistentSentimentData)
 
       val consistentDailyFinData =
         consistentFinancialData.companyDailyFinData.filter(consistentDatesOfFinDataIntersectSentimentDates)
-      println("consistentDailyFinData:" + consistentDailyFinData)
 
       val consistentYearlyFinData =
         consistentFinancialData.companyYearlyFinData.filter(consistentDatesOfFinDataIntersectSentimentDates.map(_.getYear))
-      println("consistentYearlyFinData :" + consistentYearlyFinData )
-
 
       CombinedCompanyParameters(
         allParameters.symbol,

@@ -44,6 +44,7 @@ object TrainingMatrixBuilder {
     //We should not take all the quotes in the training matrix, some are to be putted in Y
     val quotes: List[CompanyDailyFinDataEntry] =
       company.extendedFinData.companyDailyFinData.parameterQuotes.allCompanyEntriesOfOneDailyParam
+    println("quotes:" + quotes)
     val mapQuotes: Map[DateTime, Double] =
       quotes.filter(dateWithVal => mapDividends.keySet.contains(dateWithVal.date))
       .foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
@@ -59,7 +60,11 @@ object TrainingMatrixBuilder {
         mapDividends(dateTime),
         mapSUE(dateTime),
         mapQuotes(dateTime),
-        newsTitles(dateTime).pos, newsTitles(dateTime).veryPos, newsTitles(dateTime).neut, newsTitles(dateTime).neg, newsTitles(dateTime).veryNeg,
+        newsTitles(dateTime).veryPos,
+        newsTitles(dateTime).pos,
+        newsTitles(dateTime).neut,
+        newsTitles(dateTime).neg,
+        newsTitles(dateTime).veryNeg,
         newsDescript(dateTime).pos, newsDescript(dateTime).veryPos, newsDescript(dateTime).neut, newsDescript(dateTime).neg, newsDescript(dateTime).veryNeg
       ), resultQuotesMap(dateTime.plusDays(1)))
     )
