@@ -5,8 +5,9 @@ import org.scalatest.{FlatSpec, Matchers}
 import utils.readers.ReadableDefaults._
 import filters.DefaultFilterData._
 import filters.FilterSyntax.FilterOps
-import model.dailyNewsParameters.CompanyAllNews
+import model.dailyNewsParameters.{CompanyAllNews, News}
 import model.CombinedCompanyParameters
+import model.sentiment.CompanyNewsSentiment
 import neuralNetModel.TrainingMatrixBuilder._
 import org.scalatest.concurrent.ScalaFutures
 
@@ -33,10 +34,10 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
     println("HEAD:" + symbols.head)
     println("symbols size in CombinedCompanyParametersReader:" + CombinedCompanyParametersReader.getNamesOfFiles().size)
 
-    lazy val allCompaniesParams: Vector[Validation[String, CombinedCompanyParameters]] = symbols.take(1).map {
+    lazy val allCompaniesParams: Vector[Validation[String, CombinedCompanyParameters]] = symbols.take(10).map {
       fileName =>
         println("file to read: " + fileName)
-        val combinedNonFiltered = CombinedCompanyParametersReader.readDataFromFile(fileName)
+        val combinedNonFiltered: Validation[String, CombinedCompanyParameters] = CombinedCompanyParametersReader.readDataFromFile(fileName)
         val combinedNonFilteredWithDerivedParams = combinedNonFiltered.map { notFiltered => notFiltered.copy(extendedFinData =
           notFiltered.extendedFinData.deriveAdditionalFinParameters)
         }
@@ -44,7 +45,7 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
     }.toVector
 
     val allNews: Vector[ErrorValidation[CompanyAllNews]] =
-      symbols.take(1).map {
+      symbols.take(10).map {
         fileName => CompanyNewsReader.readDataFromFile(fileName)
       }.toVector
 
@@ -55,10 +56,16 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
         group => group.map {
           validatAllParamsWithNews =>
             (validatAllParamsWithNews._1 |@| validatAllParamsWithNews._2) {
-              (allParams, news) =>
-                val senti = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(news)
-                allParams.copy(newsSentiment = Some(senti))
-                  .filter   //now we have the final Combined parameters
+              (allParams: CombinedCompanyParameters, news: CompanyAllNews) =>
+                val emptyCompanyNewsSentiWithDates = CompanyNewsSentiment(news.symbol, news.news.map(_.dateOfNews).toSet)
+                val allParamsFilteredNoSentiment = allParams.copy(newsSentiment = Some(emptyCompanyNewsSentiWithDates))
+                  .filter
+                val newsFiltered: Stream[News] = news.news.filter(
+                    allParamsFilteredNoSentiment.extendedFinData.companyDailyFinData.parameterSUEs.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
+                        .contains(_)
+                )
+                val senti = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(news.copy(news = newsFiltered))
+                allParams.copy(newsSentiment = Some(senti))   //now we have the final Combined parameters
             }
         }
       }.fold(Vector.empty[Validation[String, CombinedCompanyParameters]])((vector1, vector2) => vector1 ++ vector2)

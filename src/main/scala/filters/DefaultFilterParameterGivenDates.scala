@@ -67,6 +67,8 @@ object DefaultFilterParameterGivenDates {
       */
     override def applyFilter(companySentiments: CompanyNewsSentiment, consistentDates: Set[DateTime]): CompanyNewsSentiment = {
 
+      val consistentDatesInCompanyNews = companySentiments.dates.filter(consistentDates.contains(_))
+
       val consistentAvgTitleM: Map[DateTime, Sentiment] =
         companySentiments.avgSentiPerDateTitle.filterKeys{
           dateE => consistentDates.contains(dateE) //&& consistentDates.contains(dateE.plusDays(1))
@@ -76,7 +78,7 @@ object DefaultFilterParameterGivenDates {
           dateE => consistentDates.contains(dateE)// && consistentDates.contains(dateE.plusDays(1))
         }
 
-      CompanyNewsSentiment(companySentiments.sym, consistentAvgTitleM, consistentAvgDescriptM)
+      CompanyNewsSentiment(companySentiments.sym, consistentAvgTitleM, consistentAvgDescriptM, consistentDatesInCompanyNews)
     }
   }
 

@@ -69,7 +69,7 @@ object SentimentAnalyzer {
     val avgTitlesSentisPerDate: Map[DateTime, Sentiment] = titlesSentisPerDate.mapValues(findAvgSenti)
     val avgDescriptionsSentisPerDate: Map[DateTime, Sentiment] = descriptionsSentisPerDate.mapValues(findAvgSenti)
 
-    CompanyNewsSentiment(allCompanyNews.symbol, avgTitlesSentisPerDate, avgDescriptionsSentisPerDate)
+    CompanyNewsSentiment(allCompanyNews.symbol, avgTitlesSentisPerDate, avgDescriptionsSentisPerDate, avgDescriptionsSentisPerDate.keySet)
   }
 
 

@@ -13,13 +13,15 @@ object TrainingMatrixBuilder {
     def iterate(companies: List[CombinedCompanyParameters], acc: Set[(List[Double], Double)]):
     (Set[List[Double]], Set[Double]) = companies match {
 
-      case Nil => (acc.map(_._1), acc.map(_._2))
+      case Nil =>
+        println("list to return of size:" + acc.size)
+        (acc.map(_._1), acc.map(_._2))
 
       case h :: t =>
         val matrixForCompabt: Set[(List[Double], Double)] = createMatrixFromCompany(h)
         iterate(t, matrixForCompabt ++ acc)
     }
-    iterate(companies, Set.empty)
+    iterate(companies, Set.empty[(List[Double], Double)])
   }
 
 
@@ -80,8 +82,9 @@ object TrainingMatrixBuilder {
 
   def createMatrixFromCompany(company: CombinedCompanyParameters): Set[(List[Double], Double)] = {
     val allDates = company.extendedFinData.companyDailyFinData.parameterQuotes.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
-    val fromDailyAndResult: Set[(List[Double], Double)] = createMatrixFromDailyParams(company)
-    val fromYearly: Set[List[Double]] = createMatrixFromYearlyParams(company, allDates)
+    println("allDates:" + allDates.size)
+    lazy val fromDailyAndResult: Set[(List[Double], Double)] = createMatrixFromDailyParams(company)
+    lazy val fromYearly: Set[List[Double]] = createMatrixFromYearlyParams(company, allDates)
 
     (fromDailyAndResult zip fromYearly).map(dailyAndYearlyList =>
       (dailyAndYearlyList._1._1 ++ dailyAndYearlyList._2, dailyAndYearlyList._1._2)
