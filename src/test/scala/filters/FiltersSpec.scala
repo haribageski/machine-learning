@@ -50,8 +50,6 @@ class FiltersSpec extends FlatSpec with Matchers {
     val dividendsRead: ErrorValidation[CompanyDailyFinParameter] = CompanyDailyFinParameterReader.readDividendFromFile(sym)
     val synchronizedDividends: Validation[String, CompanyDailyFinParameter] = dividendsRead.map(_.filter(Set(1998, 2000)))
 
-    println("synchronizedDividends:" + synchronizedDividends)
-    println("toComp:" + toComp)
     synchronizedDividends.map(_ == toComp should be(true))
   }
 
@@ -137,11 +135,12 @@ class FiltersSpec extends FlatSpec with Matchers {
       .addEntry(CompanyYearlyFinDataEntry(symbol, 124.2, 2013))
       .addEntry(CompanyYearlyFinDataEntry(symbol, 124.2, 2012))
     val companyYearlyFinData =
-      CompanyYearlyFinData(symbol, companyYearlyFinParameter2, companyYearlyFinParameter2, CompanyYearlyFinParameter("A"), companyYearlyFinParameter2)
+      CompanyYearlyFinData(symbol, companyYearlyFinParameter2, companyYearlyFinParameter2, companyYearlyFinParameter2, companyYearlyFinParameter2)
 
     val dividends = List(
       CompanyDailyFinDataEntry(symbol, 0.00400000018998981, fromString("07/08/2012")),
       CompanyDailyFinDataEntry(symbol, 0.00400000018998981, fromString("07/08/2013")),
+      CompanyDailyFinDataEntry(symbol, 0.00400000018998981, fromString("04/04/2014")),
       CompanyDailyFinDataEntry(symbol, 0.00400000018998981, fromString("20/11/2015")),
       CompanyDailyFinDataEntry(symbol, 0.00432999990880489, fromString("04/02/2015"))
     )
@@ -155,6 +154,9 @@ class FiltersSpec extends FlatSpec with Matchers {
         ),
         2013 -> TreeSet(
           CompanyDailyFinDataEntry(symbol, 0.00400000018998981, fromString("07/08/2013"))
+        ),
+        2014 -> TreeSet(
+          CompanyDailyFinDataEntry(symbol, 0.00400000018998981, fromString("04/04/2014"))
         ),
         2015 -> TreeSet(
           CompanyDailyFinDataEntry(symbol, 0.00400000018998981, fromString("20/11/2015")),
@@ -171,22 +173,39 @@ class FiltersSpec extends FlatSpec with Matchers {
     val sentimentInOneGo: Validation[String, CompanyNewsSentiment] = allCompanyNews.map(x => SentimentAnalyzer.evaluateSentiOfAllCompanyNews(x))
 
 
-    val combinedCompanyParameters: Validation[String, CombinedCompanyParameters] = sentimentInOneGo.map{
+    val combinedCompanyParameters: Validation[String, CombinedCompanyParameters] = sentimentInOneGo.map {
       (senti: CompanyNewsSentiment) => CombinedCompanyParameters(symbol, extendedFinData, Some(senti))
     }
 
     val combinedCompanyParametersFiltered: Validation[String, CombinedCompanyParameters] =
       combinedCompanyParameters.map(_.filter)
 
-    combinedCompanyParametersFiltered.map(_.extendedFinData should be(
-      extendedFinData.filter)
-    )
+    (combinedCompanyParametersFiltered |@| allCompanyNews) {
+      (param1, param2) => {
+        //the filtered extendedFin in CombinedParams should be same as first being filtered itself, and then filtered by news dates
+        param1.extendedFinData.companyDailyFinData should be {
+          val f = (extendedFinData.filter)
+          f.companyDailyFinData.filter(param2.news.map(_.dateOfNews).toSet)
+        }
+        param1.extendedFinData.companyYearlyFinData should be {
+          val f = (extendedFinData.filter)
+          f.companyYearlyFinData.filter(param2.news.map(_.dateOfNews.getYear).toSet)
+        }
+        //the filtered newsSentiment in CombinedParams should be same as newsSentiment being filtered by parameterDividends dates
+        sentimentInOneGo.map(news => {
+          param1.newsSentiment should be {
+            Some(
+              news.filter(param1.extendedFinData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date).toSet)
+            )
+          }
+        })
+      }
+    }
   }
 
-  pending
   "CombinedCompanyParametersFilter.filter()" should
     "return CombinedCompanyParametersFilter that contains only consistent in year entries" in {
-    val symbol = "Example"
+    val symbol = "Example2"
     val combinedNonFiltered = CombinedCompanyParametersReader.readDataFromFile(symbol)
     val combinedNonFilteredWithDerivedParams = combinedNonFiltered.map { notFiltered => notFiltered.copy(extendedFinData =
       notFiltered.extendedFinData.deriveAdditionalFinParameters)
@@ -206,7 +225,7 @@ class FiltersSpec extends FlatSpec with Matchers {
     pending
     (filteredCombinedParams |@| CompanyDailyFinDataReader.readDataFromFile(symbol)) { (param1, param2: CompanyDailyFinData) =>
       param1.extendedFinData.companyDailyFinData.parameterQuotes shouldBe
-        param2.filter(Set(fromString("05/04/2014"), fromString("04/04/2014")))
+        param2.filter(Set(fromString("04/04/2014"))).parameterQuotes
     }
     (filteredCombinedParams |@| combinedNonFilteredWithDerivedParams) { (param1, param2) =>
       param1.extendedFinData.companyYearlyFinData shouldBe

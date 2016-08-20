@@ -37,19 +37,17 @@ object DefaultFilterData {
       val intersectAllThreeDailyParamsYears =
         parameterDividends
           .intersect(parameterSUEs)
-//          .intersect(parameterQuotes)
-          .filter(dateTime => parameterQuotes.contains(dateTime.plusDays(1)) && parameterQuotes.contains(dateTime))
+          .intersect(parameterQuotes)
 
-      println("intersectAllThreeDailyParamsYears:" + intersectAllThreeDailyParamsYears)
+      val intersectionConsecutiveQuotesExisting =
+        intersectAllThreeDailyParamsYears.filter(date => parameterQuotes.contains(date.plusDays(1)))
 
-      val withConsecutiveQuotes =
-        parameterQuotes.intersect(intersectAllThreeDailyParamsYears ++ intersectAllThreeDailyParamsYears.map(_.plusDays(1)))
       val dividendsToAdd = companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam.filter(param =>
-        intersectAllThreeDailyParamsYears.contains(param.date))
+        intersectionConsecutiveQuotesExisting.contains(param.date))
       val quotesToAdd = companyDailyFinData.parameterQuotes.allCompanyEntriesOfOneDailyParam.filter(param =>
-        withConsecutiveQuotes.contains(param.date))
+        intersectionConsecutiveQuotesExisting.contains(param.date) || intersectionConsecutiveQuotesExisting.contains(param.date.minusDays(1)))
       val sUEsToAdd = companyDailyFinData.parameterSUEs.allCompanyEntriesOfOneDailyParam.filter(param =>
-        intersectAllThreeDailyParamsYears.contains(param.date))
+        intersectionConsecutiveQuotesExisting.contains(param.date))
 
 
       val synchronizedParameterDividends = CompanyDailyFinParameter(symbol).addEntries(dividendsToAdd)
@@ -145,13 +143,15 @@ object DefaultFilterData {
       val consistentFinancialData: CompanyExtendedFinData =
         allParameters.extendedFinData.filter
 
+
       val consistentDatesOfFinDataIntersectSentimentDates: Set[DateTime] =
         allParameters.newsSentiment match {
           case None => consistentFinancialData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
           case Some(newsSentiment) =>
             consistentFinancialData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
-              .intersect(allParameters.newsSentiment.map(_.avgSentiPerDateDescript.keySet).getOrElse(Set.empty[DateTime]))
+              .intersect(newsSentiment.dates)
         }
+
       val consistentSentimentData = allParameters.newsSentiment.map(_.filter(consistentDatesOfFinDataIntersectSentimentDates))
 
       val consistentDailyFinData =
