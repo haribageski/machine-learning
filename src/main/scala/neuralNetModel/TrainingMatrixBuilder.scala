@@ -14,9 +14,7 @@ object TrainingMatrixBuilder {
     (Set[List[Double]], Set[Double]) = companies match {
 
       case Nil =>
-        println("list to return of size:" + acc.size)
         (acc.map(_._1), acc.map(_._2))
-
       case h :: t =>
         val matrixForCompabt: Set[(List[Double], Double)] = createMatrixFromCompany(h)
         iterate(t, matrixForCompabt ++ acc)
@@ -44,7 +42,6 @@ object TrainingMatrixBuilder {
     //We should not take all the quotes in the training matrix, some are to be putted in Y
     val quotes: List[CompanyDailyFinDataEntry] =
       company.extendedFinData.companyDailyFinData.parameterQuotes.allCompanyEntriesOfOneDailyParam
-    println("quotes:" + quotes)
     val mapQuotes: Map[DateTime, Double] =
       quotes.filter(dateWithVal => mapDividends.keySet.contains(dateWithVal.date))
       .foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
@@ -54,7 +51,6 @@ object TrainingMatrixBuilder {
       quotes.filter(dateWithVal => mapDividends.keySet.map(_.plusDays(1)).contains(dateWithVal.date))
         .foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
 
-    println("mapQuotes:" + mapQuotes.map(_._1))
     mapSUE.keySet.map(dateTime =>
       (List(
         mapDividends(dateTime),
@@ -92,7 +88,6 @@ object TrainingMatrixBuilder {
 
   def createMatrixFromCompany(company: CombinedCompanyParameters): Set[(List[Double], Double)] = {
     val allDates = company.extendedFinData.companyDailyFinData.parameterQuotes.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
-    println("allDates:" + allDates.size)
     lazy val fromDailyAndResult: Set[(List[Double], Double)] = createMatrixFromDailyParams(company)
     lazy val fromYearly: Set[List[Double]] = createMatrixFromYearlyParams(company, allDates)
 
