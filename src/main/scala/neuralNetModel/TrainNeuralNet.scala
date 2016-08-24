@@ -1,0 +1,5 @@
+package neuralNetModel
+
+class TrainNeuralNet {
+
+}
