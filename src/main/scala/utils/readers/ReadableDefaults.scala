@@ -34,11 +34,11 @@ object ReadableDefaults {
 
       val companyDailyFinParameter = CompanyDailyFinParameter(symbol)
 
-      val companyDivid: Validation[String, CompanyDailyFinParameter] = CompanyDailyFinParameterReader.readParameterFromFile(
-        "resources/dividends/" + symbol + ".txt",
-        symbol,
-        indexOfValue = 2
-      )
+//      val companyDivid: Validation[String, CompanyDailyFinParameter] = CompanyDailyFinParameterReader.readParameterFromFile(
+//        "resources/dividends/" + symbol + ".txt",
+//        symbol,
+//        indexOfValue = 2
+//      )
 
       val companyQuotes: Validation[String, CompanyDailyFinParameter] = CompanyDailyFinParameterReader.readParameterFromFile(
           "resources/quotes-prices/" + symbol + ".txt",
@@ -52,8 +52,9 @@ object ReadableDefaults {
           indexOfValue = 2
         )
 
-      (companyDivid |@| companyQuotes |@| companySUE){
-        (param1, param2, param3) => CompanyDailyFinData(symbol, param1, param2, param3)
+//      (companyDivid |@|
+        (companyQuotes |@| companySUE){
+        (param1, param2) => CompanyDailyFinData(symbol, param1, param2)
       }
     }
 

@@ -92,7 +92,7 @@ class CompanyExtendedFinDataSpec  extends FlatSpec with Matchers {
     filtered.map(_.companyMarketValues.foreach(_ should be(marketVal)))
     filtered.map(_.companyBMratio.foreach(_ should be(bMratio)))
     filtered.map(_.companySize.foreach(_ should be(sizeP)))
-    filtered.map(_.companyDailyFinData.parameterDividends should be(dividend))
+//    filtered.map(_.companyDailyFinData.parameterDividends should be(dividend))
     filtered.map(_.companyDailyFinData.parameterQuotes should be(quote))
     filtered.map(_.companyDailyFinData.parameterSUEs should be(sue))
   }

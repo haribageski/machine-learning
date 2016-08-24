@@ -164,7 +164,7 @@ class FiltersSpec extends FlatSpec with Matchers {
         )
       )
     )
-    val companyDailyFinData = CompanyDailyFinData(symbol, companyDailyFinParam, companyDailyFinParam, companyDailyFinParam)
+    val companyDailyFinData = CompanyDailyFinData(symbol, companyDailyFinParam, companyDailyFinParam)
 
     val extendedFinData = CompanyExtendedFinData(companyYearlyFinData, companyDailyFinData)
       .deriveAdditionalFinParameters()
@@ -195,7 +195,7 @@ class FiltersSpec extends FlatSpec with Matchers {
         sentimentInOneGo.map(news => {
           param1.newsSentiment should be {
             Some(
-              news.filter(param1.extendedFinData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam.map(_.date).toSet)
+              news.filter(param1.extendedFinData.companyDailyFinData.parameterSUEs.allCompanyEntriesOfOneDailyParam.map(_.date).toSet)
             )
           }
         })
@@ -212,11 +212,11 @@ class FiltersSpec extends FlatSpec with Matchers {
     }
     val filteredCombinedParams = combinedNonFiltered.map(_.filter)
 
-    (filteredCombinedParams |@| CompanyDailyFinDataReader.readDataFromFile(symbol)) { (param1, param2) =>
-      param1.extendedFinData.companyDailyFinData.parameterDividends shouldBe {
-        param2.filter(Set(fromString("04/04/2014"))).parameterDividends
-      }
-    }
+//    (filteredCombinedParams |@| CompanyDailyFinDataReader.readDataFromFile(symbol)) { (param1, param2) =>
+//      param1.extendedFinData.companyDailyFinData.parameterDividends shouldBe {
+//        param2.filter(Set(fromString("04/04/2014"))).parameterDividends
+//      }
+//    }
     (filteredCombinedParams |@| CompanyDailyFinDataReader.readDataFromFile(symbol)) { (param1, param2) =>
       param1.extendedFinData.companyDailyFinData.parameterSUEs shouldBe {
         param2.filter(Set(fromString("04/04/2014"))).parameterSUEs

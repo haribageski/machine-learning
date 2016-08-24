@@ -21,7 +21,8 @@ object ShowDefaults {
       s"ROE: ${yearlyData.rOE};\n accrual: ${yearlyData.accrual}"
   }
   implicit def companyDailyFinDataShow: Show[CompanyDailyFinData] = Show.show[CompanyDailyFinData] { dailyData =>
-    s"dividends: ${dailyData.parameterDividends};\n quotes: ${dailyData.parameterQuotes};" +
+//    s"dividends: ${dailyData.parameterDividends};\n" +
+      s" quotes: ${dailyData.parameterQuotes};" +
       s"\n SUE: ${dailyData.parameterSUEs}"
   }
   implicit def companyYearlyFinParameterShow: Show[CompanyYearlyFinParameter] = Show.show[CompanyYearlyFinParameter] {

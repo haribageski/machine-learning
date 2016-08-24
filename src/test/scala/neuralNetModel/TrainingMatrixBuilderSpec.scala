@@ -57,12 +57,11 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
           validatAllParamsWithNews =>
             (validatAllParamsWithNews._1 |@| validatAllParamsWithNews._2) {
               (allParams: CombinedCompanyParameters, news: CompanyAllNews) =>
-                val emptyCompanyNewsSentiWithDates = CompanyNewsSentiment(news.symbol, news.news.map(_.dateOfNews).toSet)
+                val emptyCompanyNewsSentiWithDates = CompanyNewsSentiment(news.symbol, news.news.map(_.dateOfNews).toSet) //we only store the dates of the news so we can filter them
                 val allParamsFilteredNoSentiment = allParams.copy(newsSentiment = Some(emptyCompanyNewsSentiWithDates))
                   .filter
                 val newsFiltered: Stream[News] = news.news.filter(news =>
-                    allParamsFilteredNoSentiment.extendedFinData.companyDailyFinData.parameterSUEs.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
-                      .contains(news.dateOfNews)
+                    allParamsFilteredNoSentiment.newsSentiment.get.dates.contains(news.dateOfNews)
                 )
                 val senti = SentimentAnalyzer.evaluateSentiOfAllCompanyNews(news.copy(news = newsFiltered))
                 allParamsFilteredNoSentiment.copy(newsSentiment = Some(senti))
@@ -83,7 +82,11 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
       }, (vector1, vector2) => vector1 ++ vector2)
     }
     val x = createMatrix(allCombinedSeq.toList)
-    println("X size:" + x._1.size)
+    println("Matrix size " + x._1.size)
+    println("X")
+    println(x._1)
+    println("Y")
+    println(x._2)
     1 should be(1)
   }
 }

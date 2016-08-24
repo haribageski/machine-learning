@@ -5,6 +5,8 @@ import model.dailyFinancialParameters.CompanyDailyFinDataEntry
 import model.sentiment.Sentiment
 import org.joda.time.DateTime
 import scala.collection.parallel.ParMap
+import scalaz.Scalaz._
+import scalaz._
 
 object TrainingMatrixBuilder {
   //We expect the input parameter to be filtered out from inconsistent entries
@@ -16,8 +18,8 @@ object TrainingMatrixBuilder {
       case Nil =>
         (acc.map(_._1), acc.map(_._2))
       case h :: t =>
-        val matrixForCompabt: Set[(List[Double], Double)] = createMatrixFromCompany(h)
-        iterate(t, matrixForCompabt ++ acc)
+        val matrixForCompany: Set[(List[Double], Double)] = createMatrixFromCompany(h)
+        iterate(t, matrixForCompany ++ acc)
     }
     iterate(companies, Set.empty[(List[Double], Double)])
   }
@@ -34,10 +36,10 @@ object TrainingMatrixBuilder {
     val mapSUE: Map[DateTime, Double] =
       sUE.foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
 
-    val dividends: List[CompanyDailyFinDataEntry] =
-      company.extendedFinData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam
+//    val dividends: List[CompanyDailyFinDataEntry] =
+//      company.extendedFinData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam
     val mapDividends: Map[DateTime, Double] =
-      dividends.foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
+      sUE.foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
 
     //We should not take all the quotes in the training matrix, some are to be putted in Y
     val quotes: List[CompanyDailyFinDataEntry] =
@@ -45,25 +47,26 @@ object TrainingMatrixBuilder {
     val mapQuotes: Map[DateTime, Double] =
       quotes.filter(dateWithVal => mapDividends.keySet.contains(dateWithVal.date))
       .foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
-
-
     val resultQuotesMap: Map[DateTime, Double] =
-      quotes.filter(dateWithVal => mapDividends.keySet.map(_.plusDays(1)).contains(dateWithVal.date))
+      quotes.filter(dateWithVal => mapDividends.keySet.foldMap(date => Set(date.plusDays(1), date.plusDays(2), date.plusDays(3),
+        date.plusDays(4), date.plusDays(5), date.plusDays(6))).contains(dateWithVal.date))
         .foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
 
-    mapSUE.keySet.map(dateTime =>
+    mapSUE.keySet.zip(resultQuotesMap.keySet).map((dateTimeX_Y: (DateTime, DateTime)) => {
+      val dateTimeX = dateTimeX_Y._1
+      val dateTimeY = dateTimeX_Y._2
       (List(
-        mapDividends(dateTime),
-        mapSUE(dateTime),
-        mapQuotes(dateTime),
-        newsTitles(dateTime).veryPos,
-        newsTitles(dateTime).pos,
-        newsTitles(dateTime).neut,
-        newsTitles(dateTime).neg,
-        newsTitles(dateTime).veryNeg,
-        newsDescript(dateTime).pos, newsDescript(dateTime).veryPos, newsDescript(dateTime).neut, newsDescript(dateTime).neg, newsDescript(dateTime).veryNeg
-      ), resultQuotesMap(dateTime.plusDays(1)))
-    )
+          mapDividends(dateTimeX),
+          mapSUE(dateTimeX),
+          mapQuotes(dateTimeX),
+          newsTitles(dateTimeX).veryPos,
+          newsTitles(dateTimeX).pos,
+          newsTitles(dateTimeX).neut,
+          newsTitles(dateTimeX).neg,
+          newsTitles(dateTimeX).veryNeg,
+          newsDescript(dateTimeX).pos, newsDescript(dateTimeX).veryPos, newsDescript(dateTimeX).neut, newsDescript(dateTimeX).neg, newsDescript(dateTimeX).veryNeg
+        ), resultQuotesMap(dateTimeY))
+    })
   }
 
 

@@ -50,7 +50,7 @@ object DefaultFilterParameterGivenDates {
     override def applyFilter(value: CompanyDailyFinData, consistentDates: Set[DateTime]): CompanyDailyFinData = {
       CompanyDailyFinData(
         value.symbol,
-        value.parameterDividends.filter(consistentDates),
+//        value.parameterDividends.filter(consistentDates),
         value.parameterQuotes.filter(consistentDates ++ consistentDates.map(_.plusDays(1))),
         value.parameterSUEs.filter(consistentDates)
       )
