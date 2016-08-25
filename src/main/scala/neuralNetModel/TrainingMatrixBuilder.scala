@@ -1,32 +1,35 @@
 package neuralNetModel
 
+import breeze.linalg.DenseMatrix
 import model.{CombinedCompanyParameters, SymYear}
 import model.dailyFinancialParameters.CompanyDailyFinDataEntry
 import model.sentiment.Sentiment
 import org.joda.time.DateTime
+
+import scala.collection.immutable.HashSet
 import scala.collection.parallel.ParMap
 import scalaz.Scalaz._
 import scalaz._
 
 object TrainingMatrixBuilder {
   //We expect the input parameter to be filtered out from inconsistent entries
-  def createMatrix(companies: List[CombinedCompanyParameters]): (Set[List[Double]], Set[Double]) = {
+  def createMatrix(companies: List[CombinedCompanyParameters]): (Set[HashSet[Double]], Set[Double]) = {
 
-    def iterate(companies: List[CombinedCompanyParameters], acc: Set[(List[Double], Double)]):
-    (Set[List[Double]], Set[Double]) = companies match {
+    def iterate(companies: List[CombinedCompanyParameters], acc: Set[(HashSet[Double], Double)]):
+    (Set[HashSet[Double]], Set[Double]) = companies match {
 
       case Nil =>
         (acc.map(_._1), acc.map(_._2))
       case h :: t =>
-        val matrixForCompany: Set[(List[Double], Double)] = createMatrixFromCompany(h)
+        val matrixForCompany: Set[(HashSet[Double], Double)] = createMatrixFromCompany(h)
         iterate(t, matrixForCompany ++ acc)
     }
-    iterate(companies, Set.empty[(List[Double], Double)])
+    iterate(companies, Set.empty[(HashSet[Double], Double)])
   }
 
 
   //set of rows
-  def createMatrixFromDailyParams(company: CombinedCompanyParameters): Set[(List[Double], Double)] = {
+  def createMatrixFromDailyParams(company: CombinedCompanyParameters): Set[(HashSet[Double], Double)] = {
     val symbol = company.symbol
     val newsTitles: Map[DateTime, Sentiment] = company.newsSentiment.map(_.avgSentiPerDateTitle).getOrElse(Map.empty)
     val newsDescript: Map[DateTime, Sentiment] = company.newsSentiment.map(_.avgSentiPerDateDescript).getOrElse(Map.empty)
@@ -38,25 +41,26 @@ object TrainingMatrixBuilder {
 
 //    val dividends: List[CompanyDailyFinDataEntry] =
 //      company.extendedFinData.companyDailyFinData.parameterDividends.allCompanyEntriesOfOneDailyParam
-    val mapDividends: Map[DateTime, Double] =
-      sUE.foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
+//    val mapDividends: Map[DateTime, Double] =
+//      sUE.foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
 
     //We should not take all the quotes in the training matrix, some are to be putted in Y
     val quotes: List[CompanyDailyFinDataEntry] =
       company.extendedFinData.companyDailyFinData.parameterQuotes.allCompanyEntriesOfOneDailyParam
     val mapQuotes: Map[DateTime, Double] =
-      quotes.filter(dateWithVal => mapDividends.keySet.contains(dateWithVal.date))
+      quotes.filter(dateWithVal => mapSUE.keySet.contains(dateWithVal.date))
       .foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
     val resultQuotesMap: Map[DateTime, Double] =
-      quotes.filter(dateWithVal => mapDividends.keySet.foldMap(date => Set(date.plusDays(1), date.plusDays(2), date.plusDays(3),
+      quotes.filter(dateWithVal => mapSUE.keySet.foldMap(date => Set(date.plusDays(1), date.plusDays(2), date.plusDays(3),
         date.plusDays(4), date.plusDays(5), date.plusDays(6))).contains(dateWithVal.date))
         .foldLeft(Map.empty[DateTime, Double])((acc, entry) => acc + (entry.date -> entry.value))
+
 
     mapSUE.keySet.zip(resultQuotesMap.keySet).map((dateTimeX_Y: (DateTime, DateTime)) => {
       val dateTimeX = dateTimeX_Y._1
       val dateTimeY = dateTimeX_Y._2
-      (List(
-          mapDividends(dateTimeX),
+      (HashSet(
+//          mapDividends(dateTimeX),
           mapSUE(dateTimeX),
           mapQuotes(dateTimeX),
           newsTitles(dateTimeX).veryPos,
@@ -70,11 +74,11 @@ object TrainingMatrixBuilder {
   }
 
 
-  def createMatrixFromYearlyParams(company: CombinedCompanyParameters, datesInDailyParams: Set[DateTime]): Set[List[Double]] = {
+  def createMatrixFromYearlyParams(company: CombinedCompanyParameters, datesInDailyParams: Set[DateTime]): Set[HashSet[Double]] = {
     val symbol = company.symbol
 
     datesInDailyParams
-      .map(date => List(
+      .map(date => HashSet(
           company.extendedFinData.companyYearlyFinData.accrual.perYearM(SymYear(symbol, date.getYear)).value,
           company.extendedFinData.companyYearlyFinData.bookValue.perYearM(SymYear(symbol, date.getYear)).value,
           company.extendedFinData.companyYearlyFinData.rOE.perYearM(SymYear(symbol, date.getYear)).value,
@@ -89,10 +93,10 @@ object TrainingMatrixBuilder {
 //      )
   }
 
-  def createMatrixFromCompany(company: CombinedCompanyParameters): Set[(List[Double], Double)] = {
+  def createMatrixFromCompany(company: CombinedCompanyParameters): Set[(HashSet[Double], Double)] = {
     val allDates = company.extendedFinData.companyDailyFinData.parameterQuotes.allCompanyEntriesOfOneDailyParam.map(_.date).toSet
-    lazy val fromDailyAndResult: Set[(List[Double], Double)] = createMatrixFromDailyParams(company)
-    lazy val fromYearly: Set[List[Double]] = createMatrixFromYearlyParams(company, allDates)
+    lazy val fromDailyAndResult: Set[(HashSet[Double], Double)] = createMatrixFromDailyParams(company)
+    lazy val fromYearly: Set[HashSet[Double]] = createMatrixFromYearlyParams(company, allDates)
 
     (fromDailyAndResult zip fromYearly).map(dailyAndYearlyList =>
       (dailyAndYearlyList._1._1 ++ dailyAndYearlyList._2, dailyAndYearlyList._1._2)

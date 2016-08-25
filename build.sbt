@@ -33,7 +33,18 @@ libraryDependencies ++= Seq(
   "com.github.pathikrit" %% "better-files" % betterFilesVersion,
   "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0",
   "edu.stanford.nlp" % "stanford-corenlp" % "3.6.0" classifier "models",
-  "org.scalaz" %% "scalaz-core" % "7.1.3"
+  "org.scalaz" %% "scalaz-core" % "7.1.3",
+  "org.scalanlp" %% "breeze" % "0.12",
+
+  // Native libraries are not included by default. add this if you want them (as of 0.7)
+  // Native libraries greatly improve performance, but increase jar sizes.
+  // It also packages various blas implementations, which have licenses that may or may not
+  // be compatible with the Apache License. No GPL code, as best I know.
+  "org.scalanlp" %% "breeze-natives" % "0.12",
+
+  // The visualization library is distributed separately as well.
+  // It depends on LGPL code
+  "org.scalanlp" %% "breeze-viz" % "0.12"
 ).map(_.exclude("ch.qos.logback", "logback-classic"))
 
 scalacOptions in ThisBuild ++= Seq(

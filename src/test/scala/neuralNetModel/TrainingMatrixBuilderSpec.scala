@@ -49,7 +49,7 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
         fileName => CompanyNewsReader.readDataFromFile(fileName)
       }.toVector
 
-    val allCombinedSeqOfValidat: Vector[Validation[String, CombinedCompanyParameters]] = {
+    val allCombinedValidations: Vector[Validation[String, CombinedCompanyParameters]] = {
       allCompaniesParams.zip(allNews)
         .grouped((allCompaniesParams.size.toDouble / processors).toInt + 1).toSeq.par //group of jobs to be processed in parallel
         .map {
@@ -71,8 +71,8 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
     }
 
 
-    val allCombinedSeq: Vector[CombinedCompanyParameters] = {
-      allCombinedSeqOfValidat.par.aggregate(Vector.empty[CombinedCompanyParameters])((acc, validate) => {
+    val allCombined: Vector[CombinedCompanyParameters] = {
+      allCombinedValidations.par.aggregate(Vector.empty[CombinedCompanyParameters])((acc, validate) => {
         validate match {
           case Success(a: CombinedCompanyParameters) => a +: acc
           case Failure(e) =>
@@ -81,7 +81,8 @@ class TrainingMatrixBuilderSpec  extends FlatSpec with Matchers with ScalaFuture
         }
       }, (vector1, vector2) => vector1 ++ vector2)
     }
-    val x = createMatrix(allCombinedSeq.toList)
+
+    val x = createMatrix(allCombined.toList)
     println("Matrix size " + x._1.size)
     println("X")
     println(x._1)
