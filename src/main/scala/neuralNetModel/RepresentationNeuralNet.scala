@@ -1,6 +1,6 @@
 package neuralNetModel
 
-import breeze.linalg.DenseMatrix
+import breeze.linalg.{DenseMatrix, DenseVector}
 
 //   List <Integer> s_l = new ArrayList<Integer>();
 //
@@ -17,7 +17,7 @@ import breeze.linalg.DenseMatrix
 //  static Double[][][] Ds;	// Ds = d/d Theta of J(Theta)
 
 
-case class RepresentationNuralNet(Xs: DenseMatrix[Set[Double]], Ys: DenseMatrix[Double]) {
+case class RepresentationNeuralNet(Xs: DenseMatrix[Double], Ys: DenseMatrix[Double]) {
 
   val numOfParameters: Int = Xs.cols
   val trainingSize = Xs.rows
@@ -27,13 +27,15 @@ case class RepresentationNuralNet(Xs: DenseMatrix[Set[Double]], Ys: DenseMatrix[
   val K = 1
   //output units
   val lambda = 0.00000001
-  val emsilon = Math.pow(10, -4) //possibly set it differently
+  val epsilon = Math.pow(10, -4) //possibly set it differently
 }
 
-object RepresentationNuralNet {
-  def apply(raws: Set[(List[Double], Double)]): RepresentationNuralNet = {
-    val X: DenseMatrix[Set[Double]] = DenseMatrix.create(raws.size, raws.head._1.size, raws.toList.map(_._1.toSet).toArray)
-    val Y: DenseMatrix[Double] = DenseMatrix.create(raws.size, 1, raws.toList.map(_._2).toArray)
+object RepresentationNeuralNet {
+  def apply(raws: Array[(Set[Double], Double)]): RepresentationNeuralNet = {
+
+
+    val X: DenseMatrix[Double] = DenseMatrix.create(raws.size, raws.head._1.size, raws.map(_._1).flatten)
+    val Y: DenseMatrix[Double] = DenseMatrix.create(raws.size, 1, raws.map(_._2))
     apply(X, Y)
   }
 }
