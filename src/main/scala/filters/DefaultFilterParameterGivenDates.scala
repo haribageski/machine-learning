@@ -5,6 +5,7 @@ import model.sentiment.{CompanyNewsSentiment, Sentiment}
 import org.joda.time.DateTime
 import FilterSyntax._
 import scala.annotation.tailrec
+import DefaultFilterParameterGivenYears._
 
 object DefaultFilterParameterGivenDates {
 
@@ -50,9 +51,9 @@ object DefaultFilterParameterGivenDates {
     override def applyFilter(value: CompanyDailyFinData, consistentDates: Set[DateTime]): CompanyDailyFinData = {
       CompanyDailyFinData(
         value.symbol,
-//        value.parameterDividends.filter(consistentDates),
+        value.parameterDividends.filter(consistentDates.map(_.getYear)),
         value.parameterQuotes.filter(consistentDates ++ consistentDates.map(_.plusDays(1))),
-        value.parameterSUEs.filter(consistentDates)
+        value.parameterSUEs.filter(consistentDates.map(_.getYear))
       )
     }
   }

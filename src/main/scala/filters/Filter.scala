@@ -11,5 +11,5 @@ trait FilterParameterGivenDates[A] {
 }
 
 trait FilterData[A] {
-  def applyFilter(value: A): A
+  def applyFilter(value: A): Option[A]
 }
