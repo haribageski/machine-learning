@@ -39,7 +39,7 @@ object SentimentAnalyzer {
     if (sentences != null && sentences.nonEmpty) {
       sentences.map(coreMap => {
         val sentiment: String = coreMap.get(classOf[SentimentCoreAnnotations.SentimentClass])
-        println("Sentiment for :" + coreMap.toString() + "is: " + sentiment)
+//        println("Sentiment for :" + coreMap.toString() + "is: " + sentiment)
         sentiment match {
           case "Very positive" => Sentiment(1, 0, 0, 0, 0)
           case "Positive" => Sentiment(0, 1, 0, 0, 0)

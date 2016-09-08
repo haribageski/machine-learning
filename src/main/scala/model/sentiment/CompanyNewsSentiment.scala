@@ -15,5 +15,10 @@ case class CompanyNewsSentiment(
 
 object CompanyNewsSentiment {
   def apply(sym: String, dates: Set[DateTime]): CompanyNewsSentiment =
-    apply(sym, Map.empty, Map.empty, dates)
+    apply(
+      sym,
+      dates.foldLeft(Map.empty[DateTime, Sentiment])((acc, date) => acc + (date -> Sentiment())),
+      dates.foldLeft(Map.empty[DateTime, Sentiment])((acc, date) => acc + (date -> Sentiment())),
+      dates
+    )
 }
