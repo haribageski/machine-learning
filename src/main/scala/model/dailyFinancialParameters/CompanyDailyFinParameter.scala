@@ -1,13 +1,15 @@
 package model.dailyFinancialParameters
 
+import model.yearlyFinancialParameters.CompanyYearlyFinDataEntry
+
 import scala.collection.immutable.TreeSet
 import utils.ordered.OrderedSyntax.{OrderedCompanyDailyFinDataEntry, OrderedDateTime}
 
 case class CompanyDailyFinParameter(symbol: String,
                                     oldestEntryO: Option[CompanyDailyFinDataEntry],
-                                    earliestEntryO: Option[CompanyDailyFinDataEntry],
+                                    latestEntryO: Option[CompanyDailyFinDataEntry],
                                     allCompanyEntriesOfOneDailyParam: List[CompanyDailyFinDataEntry],
-                                    groupedByYearM: Map[Int, TreeSet[CompanyDailyFinDataEntry]]
+                                    groupedByYearM: Map[Int, List[Double]]
                               ) {
 
   //TODO: Get filePath in other way (from config)
@@ -26,42 +28,30 @@ case class CompanyDailyFinParameter(symbol: String,
 
     if (entry.symbol == symbol) {
       val year = entry.date.getYear
-      val mapValueTotalPerYear: TreeSet[CompanyDailyFinDataEntry] = groupedByYearM.getOrElse(year, TreeSet())
 
-      allCompanyEntriesOfOneDailyParam match {
-        //this is the case when we add the first dividend
-        case Nil =>
-          new CompanyDailyFinParameter(symbol, Some(entry), Some(entry), List(entry), Map(year -> TreeSet(entry)))
+      val newOldest: CompanyDailyFinDataEntry = oldestEntryO.map {
+        oldestEntry =>
+          if (oldestEntry.date <= entry.date)
+            oldestEntry
+          else
+            entry
+      }.getOrElse(entry)
 
-        case l: List[CompanyDailyFinDataEntry] =>
-          if (oldestEntryO.forall(_.date <= entry.date) && earliestEntryO.forall(_.date >= entry.date))
-            this.copy(
-              allCompanyEntriesOfOneDailyParam = entry :: l,
-              groupedByYearM = groupedByYearM + (year -> (mapValueTotalPerYear + entry))
-            )
-          else if (oldestEntryO.forall(_.date >= entry.date))
-            this.copy(
-              oldestEntryO = Some(entry),
-              allCompanyEntriesOfOneDailyParam = entry :: l,
-              groupedByYearM = groupedByYearM + (year -> (mapValueTotalPerYear + entry))
-            )
-          else //if (earliestEntryO.forall(_.date <= entry.date))
-            this.copy(
-              earliestEntryO = Some(entry),
-              allCompanyEntriesOfOneDailyParam = entry :: l,
-              groupedByYearM = groupedByYearM + (year -> (mapValueTotalPerYear + entry))
-            )
-//          else
-//            this.copy(
-//              oldestEntryO = Some(entry),
-//              earliestEntryO = Some(entry),
-//              allCompanyEntriesOfOneDailyParam = entry :: l,
-//              groupedByYearM = groupedByYearM + (year -> (mapValueTotalPerYear + entry))
-//            )
-      }
+
+      val newLatest: CompanyDailyFinDataEntry = latestEntryO.map {
+        latestEntry =>
+          if (latestEntry.date >= entry.date)
+            latestEntry
+          else
+            entry
+      }.getOrElse(entry)
+
+      CompanyDailyFinParameter(symbol, Some(newOldest), Some(newLatest), entry :: allCompanyEntriesOfOneDailyParam,
+        groupedByYearM + (year -> (entry.value :: groupedByYearM.get(year).getOrElse(List.empty[Double])))
+      )
     }
     else {
-      println("Entry meant for wrong company. Cannot be added")
+      println("CompanyDailyFinParameter.addEntry(): Entry meant for wrong company. Cannot be added")
       this
     }
   }
@@ -87,4 +77,8 @@ object CompanyDailyFinParameter {
     line(index).toDouble != Double.NaN && line(index) != null
   }
 
+  def getAvgPerYear(list: List[Double]): Double = list match {
+    case Nil => 0
+    case h :: t => list.fold(0d)(_ + _) / list.size
+  }
 }
