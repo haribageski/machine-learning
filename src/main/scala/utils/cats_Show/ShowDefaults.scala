@@ -33,7 +33,7 @@ object ShowDefaults {
   implicit def companyDailyFinParameterShow: Show[CompanyDailyFinParameter] = Show.show[CompanyDailyFinParameter] {
     dailyParam =>
       s"symbol: ${dailyParam.symbol}, oldest: ${dailyParam.oldestEntryO.getOrElse("No oldest entry set")}," +
-        s" earliest: ${dailyParam.earliestEntryO.getOrElse("No earliest entry set")}," +
+        s" earliest: ${dailyParam.latestEntryO.getOrElse("No earliest entry set")}," +
         s" all entries: ${dailyParam.allCompanyEntriesOfOneDailyParam}"
   }
 }

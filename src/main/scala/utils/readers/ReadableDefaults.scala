@@ -34,11 +34,11 @@ object ReadableDefaults {
 
       val companyDailyFinParameter = CompanyDailyFinParameter(symbol)
 
-//      val companyDivid: Validation[String, CompanyDailyFinParameter] = CompanyDailyFinParameterReader.readParameterFromFile(
-//        "resources/dividends/" + symbol + ".txt",
-//        symbol,
-//        indexOfValue = 2
-//      )
+      val companyDivid: Validation[String, CompanyDailyFinParameter] = CompanyDailyFinParameterReader.readParameterFromFile(
+        "resources/dividends/" + symbol + ".txt",
+        symbol,
+        indexOfValue = 2
+      )
 
       val companyQuotes: Validation[String, CompanyDailyFinParameter] = CompanyDailyFinParameterReader.readParameterFromFile(
           "resources/quotes-prices/" + symbol + ".txt",
@@ -52,9 +52,8 @@ object ReadableDefaults {
           indexOfValue = 2
         )
 
-//      (companyDivid |@|
-        (companyQuotes |@| companySUE){
-        (param1, param2) => CompanyDailyFinData(symbol, param1, param2)
+      (companyDivid |@| companyQuotes |@| companySUE){
+        (param1, param2, param3) => CompanyDailyFinData(symbol, param1, param2, param3)
       }
     }
 
@@ -103,28 +102,28 @@ object ReadableDefaults {
         filteredZeroShares.map(
           _.map(
             line => CompanyYearlyFinDataEntry(
-              symbol, line(2).toDouble, DateExtended(line(1)).dateExtended.getYear
+              line(2).toDouble, DateExtended(line(1)).dateExtended.getYear
             )
           ))
       lazy val entriesForParameterShares: Validation[String, List[CompanyYearlyFinDataEntry]] =
         filteredZeroShares.map(
           _.map(
             line => CompanyYearlyFinDataEntry(
-              symbol, line(3).toDouble, DateExtended(line(1)).dateExtended.getYear
+              line(3).toDouble, DateExtended(line(1)).dateExtended.getYear
             )
           ))
       lazy val entriesForParameterROEs: Validation[String, List[CompanyYearlyFinDataEntry]] =
         filteredZeroShares.map(
           _.map(
             line => CompanyYearlyFinDataEntry(
-              symbol, line(4).toDouble, DateExtended(line(1)).dateExtended.getYear
+              line(4).toDouble, DateExtended(line(1)).dateExtended.getYear
             )
           ))
       lazy val entriesForParameterAccruals: Validation[String, List[CompanyYearlyFinDataEntry]] =
         filteredZeroShares.map(
           _.map(
             line => CompanyYearlyFinDataEntry(
-              symbol, line(5).toDouble, DateExtended(line(1)).dateExtended.getYear
+              line(5).toDouble, DateExtended(line(1)).dateExtended.getYear
             ))
         )
 

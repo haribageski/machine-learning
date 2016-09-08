@@ -49,6 +49,6 @@ object OrderedSyntax {
   implicit class OrderedCompanyYearlyFinDataEntry(companyYearlyFinDataEntry: CompanyYearlyFinDataEntry)
     extends Ordered[CompanyYearlyFinDataEntry] {
     def compare(that: CompanyYearlyFinDataEntry) =
-      companyYearlyFinDataEntry.symYear.compareTo(that.symYear)
+      companyYearlyFinDataEntry.year.compareTo(that.year)
   }
 }

@@ -5,7 +5,8 @@ import model.dailyFinancialParameters._
 
 import scala.annotation.tailrec
 import scala.collection.immutable.TreeSet
-
+import scalaz._
+import scalaz.Scalaz._
 
 //TODO: marketvalue to be part of companyYearly
 case class CompanyExtendedFinData(companyYearlyFinData: CompanyYearlyFinData,
@@ -14,31 +15,30 @@ case class CompanyExtendedFinData(companyYearlyFinData: CompanyYearlyFinData,
                                   companyBMratio: Option[CompanyYearlyFinParameter] = None,
                                   companySize: Option[CompanyYearlyFinParameter] = None
                                        ) {
-    /**
-      * Given the yearly parameters in CompanyYearlyFinData and the daily parameters in companyDailyFinData,
-      * it finds parameterMarketValues, parameterBMratio, and parameterSize. Then it returns
-      * new CompanyExtendedFinData with the three derived parameters included.
-      * The entries will be set of SymDates that is the intersection of all the yearly parameters entries and all the
-      * daily parameters.
+  /**
+    * Given the yearly parameters in CompanyYearlyFinData and the daily parameters in companyDailyFinData,
+    * it finds parameterMarketValues, parameterBMratio, and parameterSize. Then it returns
+    * new CompanyExtendedFinData with the three derived parameters included.
+    * The entries will be set of SymDates that is the intersection of all the yearly parameters entries and all the
+    * daily parameters.
     */
-  def deriveAdditionalFinParameters(): CompanyExtendedFinData = {
+  def deriveAdditionalFinParameters(): Option[CompanyExtendedFinData] = {
     val symYears = companyYearlyFinData.bookValue.perYearM.keySet
     val sym = companyYearlyFinData.symbol
 
-    val marketValsToAdd: List[CompanyYearlyFinDataEntry] = findMarketValuesToAdd(symYears = symYears)
-
+    val marketValsToAdd: List[CompanyYearlyFinDataEntry] = findMarketValuesToAdd(years = symYears)
 
     val bMratiosToAdd: List[CompanyYearlyFinDataEntry] = marketValsToAdd.flatMap(marketValEntry => {
       val bookValOpt: Option[CompanyYearlyFinDataEntry] =
-        companyYearlyFinData.bookValue.perYearM.get(marketValEntry.symYear)
+        companyYearlyFinData.bookValue.perYearM.get(marketValEntry.year)
       bookValOpt.map(book =>
-        marketValEntry.copy(value = Math.log10(book.value / marketValEntry.value))  //division is safe
+        marketValEntry.copy(value = Math.log10(book.value / marketValEntry.value)) //division is safe
       )
     })
 
     val sizeValsYearlyToAdd: List[CompanyYearlyFinDataEntry] = marketValsToAdd.map(marketValEntry =>
-        marketValEntry.copy(value = Math.log10(marketValEntry.value))
-      )
+      marketValEntry.copy(value = Math.log10(marketValEntry.value))
+    )
 
     val companyMarketValuesWithAddedNewValues: Option[CompanyYearlyFinParameter] =
       Some(CompanyYearlyFinParameter(sym).addEntries(marketValsToAdd))
@@ -49,33 +49,32 @@ case class CompanyExtendedFinData(companyYearlyFinData: CompanyYearlyFinData,
     val companySizeWithAddedNewValues: Option[CompanyYearlyFinParameter] =
       Some(CompanyYearlyFinParameter(sym).addEntries(sizeValsYearlyToAdd))
 
-    CompanyExtendedFinData(
-      companyYearlyFinData,
-      companyDailyFinData,
-      companyMarketValuesWithAddedNewValues,
-      companyBMratioWithAddedNewValues,
-      companySizeWithAddedNewValues
-    )
+    (companyMarketValuesWithAddedNewValues |@| companyBMratioWithAddedNewValues |@| companySizeWithAddedNewValues) {
+      (marketValues, bMratioVals, sizeVals) =>
+        Some(CompanyExtendedFinData(
+          companyYearlyFinData,
+          companyDailyFinData,
+          Some(marketValues),
+          Some(bMratioVals),
+          Some(sizeVals)
+        ))
+    }.getOrElse(None)
   }
-
-
   /**
     * Finds nonzero MarketValue using average per year quotes and yearly share for all years from the input parameter.
     * If for some year is not possible, then the returning list will not contain any MarketValue for that year.
     */
-  private def findMarketValuesToAdd(marketVals: List[CompanyYearlyFinDataEntry] = Nil, symYears: Set[SymYear]):
+  private def findMarketValuesToAdd(marketVals: List[CompanyYearlyFinDataEntry] = Nil, years: Set[Int]):
   List[CompanyYearlyFinDataEntry] = {
 
-    val setOpt: Set[Option[CompanyYearlyFinDataEntry]] = symYears.map {
-      symYear =>
-        val sym = symYear.sym
-        val year = symYear.year
+    val setOpt: Set[Option[CompanyYearlyFinDataEntry]] = years.map {
+      year =>
 
         val avgPerYQuotesClosingPrice: Option[Double] =
           getAvgQuotesClosingPricePerY(companyDailyFinData.parameterQuotes, year)
 
         val yearlyShare: Option[Double] =
-          companyYearlyFinData.shares.perYearM.get(symYear).map(_.value)
+          companyYearlyFinData.shares.perYearM.get(year).map(_.value)
 
         val marketValues: Option[Double] = for {
           avgQuote <- avgPerYQuotesClosingPrice
@@ -84,7 +83,7 @@ case class CompanyExtendedFinData(companyYearlyFinData: CompanyYearlyFinData,
 
         val nonZeroMarketValues: Option[Double] = marketValues.filter(_ != 0)
 
-        nonZeroMarketValues.map(v => CompanyYearlyFinDataEntry(sym, v, year))
+        nonZeroMarketValues.map(v => CompanyYearlyFinDataEntry(v, year))
     }
     setOpt.foldLeft(marketVals)((acc, yearlyDataOp) => {
       yearlyDataOp.map(_ :: acc)
@@ -94,17 +93,7 @@ case class CompanyExtendedFinData(companyYearlyFinData: CompanyYearlyFinData,
 
 
   private def getAvgQuotesClosingPricePerY(quotes: CompanyDailyFinParameter, year: Int): Option[Double] = {
-    val treeSetDailyEntriesOpt: Option[TreeSet[CompanyDailyFinDataEntry]] =
-      quotes.groupedByYearM.get(year)
-
-    val totalValOpt: Option[Double] = treeSetDailyEntriesOpt.map {
-      tree =>
-        tree.foldLeft(0.0)((acc, entry: CompanyDailyFinDataEntry) => acc + entry.value)
-    }
-
-    // TODO: Use ScalaZ to refactore the code below
-    treeSetDailyEntriesOpt.flatMap { tree =>
-      totalValOpt.map(total => total / tree.size)
-    }
+    quotes.groupedByYearM.get(year).map(list =>
+      CompanyDailyFinParameter.getAvgPerYear(list))
   }
 }
