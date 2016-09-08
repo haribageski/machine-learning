@@ -17,16 +17,16 @@ class CompanyYearlyFinDataSpec extends FlatSpec with Matchers {
     val symbol = "AFCB"
 
     val emptyBookValue = CompanyYearlyFinParameter(
-        symbol, null, null, TreeMap.empty[SymYear, CompanyYearlyFinDataEntry], List.empty[CompanyYearlyFinDataEntry]
+        symbol, null, null, TreeMap.empty[Int, CompanyYearlyFinDataEntry], List.empty[CompanyYearlyFinDataEntry]
     )
     val emptyShares = CompanyYearlyFinParameter(
-        symbol, null, null, TreeMap.empty[SymYear, CompanyYearlyFinDataEntry], List.empty[CompanyYearlyFinDataEntry]
+        symbol, null, null, TreeMap.empty[Int, CompanyYearlyFinDataEntry], List.empty[CompanyYearlyFinDataEntry]
     )
     val emptyROE = CompanyYearlyFinParameter(
-        symbol, null, null, TreeMap.empty[SymYear, CompanyYearlyFinDataEntry], List.empty[CompanyYearlyFinDataEntry]
+        symbol, null, null, TreeMap.empty[Int, CompanyYearlyFinDataEntry], List.empty[CompanyYearlyFinDataEntry]
     )
     val emptyAccrual = CompanyYearlyFinParameter(
-        symbol, null, null, TreeMap.empty[SymYear, CompanyYearlyFinDataEntry], List.empty[CompanyYearlyFinDataEntry]
+        symbol, null, null, TreeMap.empty[Int, CompanyYearlyFinDataEntry], List.empty[CompanyYearlyFinDataEntry]
     )
 
       CompanyYearlyFinData("AFCB", emptyBookValue, emptyShares, emptyROE, emptyAccrual)
@@ -35,82 +35,82 @@ class CompanyYearlyFinDataSpec extends FlatSpec with Matchers {
 
     val inputBookValue = CompanyYearlyFinParameter(
         symbol,
-        Some(CompanyYearlyFinDataEntry(symbol, 17.8500003814697, 2010)),
-        Some(CompanyYearlyFinDataEntry(symbol, 23.6900005340576, 2014)),
+        Some(CompanyYearlyFinDataEntry(17.8500003814697, 2010)),
+        Some(CompanyYearlyFinDataEntry(23.6900005340576, 2014)),
         TreeMap(
-          SymYear(symbol, 2010) -> CompanyYearlyFinDataEntry(symbol, 17.8500003814697, 2010),
-            SymYear(symbol, 2011) -> CompanyYearlyFinDataEntry(symbol, 18.8199996948242, 2011),
-            SymYear(symbol, 2012) -> CompanyYearlyFinDataEntry(symbol, 20.3500003814697, 2012),
-          SymYear(symbol, 2013) -> CompanyYearlyFinDataEntry(symbol, 21.7399997711182, 2013),
-          SymYear(symbol, 2014) -> CompanyYearlyFinDataEntry(symbol, 23.6900005340576, 2014)
+           2010 -> CompanyYearlyFinDataEntry(17.8500003814697, 2010),
+          2011 -> CompanyYearlyFinDataEntry(18.8199996948242, 2011),
+            2012 -> CompanyYearlyFinDataEntry(20.3500003814697, 2012),
+          2013 -> CompanyYearlyFinDataEntry(21.7399997711182, 2013),
+          2014 -> CompanyYearlyFinDataEntry(23.6900005340576, 2014)
         ),
 
         List(
-          CompanyYearlyFinDataEntry(symbol, 17.8500003814697, 2010),
-            CompanyYearlyFinDataEntry(symbol, 18.8199996948242, 2011),
-          CompanyYearlyFinDataEntry(symbol, 20.3500003814697, 2012),
-          CompanyYearlyFinDataEntry(symbol, 21.7399997711182, 2013),
-          CompanyYearlyFinDataEntry(symbol, 23.6900005340576, 2014)
+          CompanyYearlyFinDataEntry(17.8500003814697, 2010),
+            CompanyYearlyFinDataEntry(18.8199996948242, 2011),
+          CompanyYearlyFinDataEntry(20.3500003814697, 2012),
+          CompanyYearlyFinDataEntry(21.7399997711182, 2013),
+          CompanyYearlyFinDataEntry(23.6900005340576, 2014)
         )
     )
     val inputShares = CompanyYearlyFinParameter(
         symbol,
-        Some(CompanyYearlyFinDataEntry(symbol, 3, 2010)),
-        Some(CompanyYearlyFinDataEntry(symbol, 2, 2014)),
+        Some(CompanyYearlyFinDataEntry(3, 2010)),
+        Some(CompanyYearlyFinDataEntry(2, 2014)),
         TreeMap(
-          SymYear(symbol, 2010) -> CompanyYearlyFinDataEntry(symbol, 3, 2010),
-          SymYear(symbol, 2011) -> CompanyYearlyFinDataEntry(symbol, 3, 2011),
-          SymYear(symbol, 2012) -> CompanyYearlyFinDataEntry(symbol, 2, 2012),
-          SymYear(symbol, 2013) -> CompanyYearlyFinDataEntry(symbol, 2, 2013),
-          SymYear(symbol, 2014) -> CompanyYearlyFinDataEntry(symbol, 2, 2014)
+          2010 -> CompanyYearlyFinDataEntry(3, 2010),
+          2011 -> CompanyYearlyFinDataEntry(3, 2011),
+          2012 -> CompanyYearlyFinDataEntry(2, 2012),
+          2013 -> CompanyYearlyFinDataEntry(2, 2013),
+          2014 -> CompanyYearlyFinDataEntry(2, 2014)
         ),
 
         List(
-          CompanyYearlyFinDataEntry(symbol, 3, 2010),
-          CompanyYearlyFinDataEntry(symbol, 3, 2011),
-          CompanyYearlyFinDataEntry(symbol, 2, 2012),
-          CompanyYearlyFinDataEntry(symbol, 2, 2013),
-          CompanyYearlyFinDataEntry(symbol, 2, 2014)
+          CompanyYearlyFinDataEntry(3, 2010),
+          CompanyYearlyFinDataEntry(3, 2011),
+          CompanyYearlyFinDataEntry(2, 2012),
+          CompanyYearlyFinDataEntry(2, 2013),
+          CompanyYearlyFinDataEntry(2, 2014)
         )
     )
     val inputROE = CompanyYearlyFinParameter(
         symbol,
-        Some(CompanyYearlyFinDataEntry(symbol, 0.340000003576279, 2010)),
-        Some(CompanyYearlyFinDataEntry(symbol, 1.51999998092651, 2014)),
+        Some(CompanyYearlyFinDataEntry(0.340000003576279, 2010)),
+        Some(CompanyYearlyFinDataEntry(1.51999998092651, 2014)),
         TreeMap(
-          SymYear(symbol, 2010) -> CompanyYearlyFinDataEntry(symbol, 0.340000003576279, 2010),
-          SymYear(symbol, 2011) -> CompanyYearlyFinDataEntry(symbol, 0.75, 2011),
-          SymYear(symbol, 2012) -> CompanyYearlyFinDataEntry(symbol, 1.0900000333786, 2012),
-          SymYear(symbol, 2013) -> CompanyYearlyFinDataEntry(symbol, 1.12999999523163, 2013),
-          SymYear(symbol, 2014) -> CompanyYearlyFinDataEntry(symbol, 1.51999998092651, 2014)
+          2010 -> CompanyYearlyFinDataEntry(0.340000003576279, 2010),
+          2011 -> CompanyYearlyFinDataEntry(0.75, 2011),
+          2012 -> CompanyYearlyFinDataEntry(1.0900000333786, 2012),
+          2013 -> CompanyYearlyFinDataEntry(1.12999999523163, 2013),
+          2014 -> CompanyYearlyFinDataEntry(1.51999998092651, 2014)
         ),
 
         List(
-          CompanyYearlyFinDataEntry(symbol, 0.340000003576279, 2010),
-          CompanyYearlyFinDataEntry(symbol, 0.75, 2011),
-          CompanyYearlyFinDataEntry(symbol, 1.0900000333786, 2012),
-          CompanyYearlyFinDataEntry(symbol, 1.12999999523163, 2013),
-          CompanyYearlyFinDataEntry(symbol, 1.51999998092651, 2014)
+          CompanyYearlyFinDataEntry(0.340000003576279, 2010),
+          CompanyYearlyFinDataEntry(0.75, 2011),
+          CompanyYearlyFinDataEntry(1.0900000333786, 2012),
+          CompanyYearlyFinDataEntry(1.12999999523163, 2013),
+          CompanyYearlyFinDataEntry(1.51999998092651, 2014)
         )
     )
     val inputAccrual = CompanyYearlyFinParameter(
         symbol,
-        Some(CompanyYearlyFinDataEntry(symbol, 1, 2010)),
-        Some(CompanyYearlyFinDataEntry(symbol, 3, 2014)),
+        Some(CompanyYearlyFinDataEntry(1, 2010)),
+        Some(CompanyYearlyFinDataEntry(3, 2014)),
         TreeMap(
-          SymYear(symbol, 2010) -> CompanyYearlyFinDataEntry(symbol, 1, 2010),
-          SymYear(symbol, 2011) -> CompanyYearlyFinDataEntry(symbol, 2, 2011),
-          SymYear(symbol, 2012) -> CompanyYearlyFinDataEntry(symbol, 3, 2012),
-          SymYear(symbol, 2013) -> CompanyYearlyFinDataEntry(symbol, 2, 2013),
-          SymYear(symbol, 2014) -> CompanyYearlyFinDataEntry(symbol, 3, 2014)
+          2010 -> CompanyYearlyFinDataEntry( 1, 2010),
+          2011 -> CompanyYearlyFinDataEntry( 2, 2011),
+          2012 -> CompanyYearlyFinDataEntry( 3, 2012),
+          2013 -> CompanyYearlyFinDataEntry( 2, 2013),
+          2014 -> CompanyYearlyFinDataEntry( 3, 2014)
         ),
 
         List(
-          CompanyYearlyFinDataEntry(symbol, 1, 2010),
-          CompanyYearlyFinDataEntry(symbol, 2, 2011),
-          CompanyYearlyFinDataEntry(symbol, 3, 2012),
-          CompanyYearlyFinDataEntry(symbol, 2, 2013),
-          CompanyYearlyFinDataEntry(symbol, 3, 2014)
+          CompanyYearlyFinDataEntry( 1, 2010),
+          CompanyYearlyFinDataEntry( 2, 2011),
+          CompanyYearlyFinDataEntry( 3, 2012),
+          CompanyYearlyFinDataEntry( 2, 2013),
+          CompanyYearlyFinDataEntry( 3, 2014)
         )
     )
     inputCompany should be(Success(CompanyYearlyFinData("AFCB", inputBookValue, inputShares, inputROE, inputAccrual)))

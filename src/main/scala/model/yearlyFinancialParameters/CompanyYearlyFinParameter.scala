@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 case class CompanyYearlyFinParameter(symbol: String,
                                      oldestEntryOpt: Option[CompanyYearlyFinDataEntry],
                                      earliestEntryOpt: Option[CompanyYearlyFinDataEntry],
-                                     perYearM: Map[SymYear, CompanyYearlyFinDataEntry],
+                                     perYearM: Map[Int, CompanyYearlyFinDataEntry],
                                      allCompanyEntriesOfOneYearlyParam: List[CompanyYearlyFinDataEntry]
                                        ) {
 
@@ -22,31 +22,31 @@ case class CompanyYearlyFinParameter(symbol: String,
     */
   def addEntry(entry: CompanyYearlyFinDataEntry): CompanyYearlyFinParameter = {
     import utils.ordered.OrderedSyntax.OrderedSymYear
-    if (entry.symbol == symbol) {
+//    if (entry.symbol == symbol) {
       val symYear = SymYear(symbol, entry.year)
 
       allCompanyEntriesOfOneYearlyParam match {
         case Nil => //this is the case when we add the first dividend
-          CompanyYearlyFinParameter(symbol, Some(entry), Some(entry), TreeMap(symYear -> entry), List(entry))
+          CompanyYearlyFinParameter(symbol, Some(entry), Some(entry), TreeMap(entry.year -> entry), List(entry))
 
         case l: List[CompanyYearlyFinDataEntry] =>
           if (oldestEntryOpt.forall(_.year <= entry.year) && earliestEntryOpt.forall(_.year >= entry.year)) {
             this.copy(
-              perYearM = perYearM + (symYear -> entry),
+              perYearM = perYearM + (entry.year -> entry),
               allCompanyEntriesOfOneYearlyParam = entry :: l
             )
           }
           else if (oldestEntryOpt.forall(_.year >= entry.year) && earliestEntryOpt.forall(_.year >= entry.year )) {
             this.copy(
               oldestEntryOpt = Some(entry),
-              perYearM = perYearM + (symYear -> entry),
+              perYearM = perYearM + (entry.year -> entry),
               allCompanyEntriesOfOneYearlyParam = entry :: l
             )
           }
           else //if (oldestEntryOpt.forall(_.year <= entry.year) && earliestEntryOpt.forall(_.year <= entry.year)) {
             this.copy(
               earliestEntryOpt = Some(entry),
-              perYearM = perYearM + (symYear -> entry),
+              perYearM = perYearM + (entry.year -> entry),
               allCompanyEntriesOfOneYearlyParam = entry :: l
             )
 //          else {
@@ -58,11 +58,11 @@ case class CompanyYearlyFinParameter(symbol: String,
 //            )
 //          }
       }
-    }
-    else {
-      println(s"Entry meant for $symbol, but found one for ${entry.symbol}. Cannot be added")
-      this
-    }
+//    }
+//    else {
+//      println(s"Entry meant for $symbol, but found one for ${entry.symbol}. Cannot be added")
+//      this
+//    }
   }
 
 
